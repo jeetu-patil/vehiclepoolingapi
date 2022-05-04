@@ -29,6 +29,8 @@ router.get("/view-profile/:id",userController.viewProfile);
 
 router.post("/edit-profile",userController.editProfile);
 
-router.post("/verify-mobile",userController.verifyMobile);
+router.get("/verify-mobile/:mobile",userController.verifyMobile);
+
+router.get("/verifymobile/:mobile",userController.confirmMobileVerification);
 
 module.exports = router;
