@@ -11,11 +11,15 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.0",
+    "config": "^3.3.7",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "express": "^4.18.1",
     "express-validator": "^6.14.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.3.1",
     "multer": "^1.4.4",
+    "nodemailer": "^6.7.4",
     "nodemon": "^2.0.16",
     "razorpay": "^2.8.1"
   }
