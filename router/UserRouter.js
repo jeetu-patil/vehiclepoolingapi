@@ -13,7 +13,7 @@ var storage = multer.diskStorage(
     }
 );
 var upload = multer({storage : storage});
-router.post("/signup",upload.single("aadharCard"),userController.signUp);
+router.post("/signup",userController.signUp);
     // body("name").notEmpty(),
     // body("email").isEmail().notEmpty(),
     // body("password","password minimum length must be 6").isLength(6).notEmpty(),

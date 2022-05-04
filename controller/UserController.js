@@ -22,10 +22,9 @@ exports.signUp = (request, response) => {
         name: request.body.name,
         email: request.body.email,
         password: encrypted,
-        mobile: request.body.mobile,
         age: request.body.age,
         gender: request.body.gender,
-        aadharCard: "http://localhost:3000/images/" + request.file.filename,
+        aadharCard: request.body.aadhar,
     });
     user
         .save()
