@@ -16,7 +16,6 @@ const userSchema = new mongoose.Schema({
     },
     mobile : {
         type : Number,
-        required : true,
         unique : true
     },
     age : {
@@ -59,19 +58,21 @@ const userSchema = new mongoose.Schema({
     },
     drivingLicense : {
         type : String,
-        // required : true,
         default : ""
     },
     vehicle : {
         name : {
-            type : String
+            type : String,
+            default : ""
         },
         image : {
-            type : String
+            type : String,
+            default : ""
         },
         wheeler : {
-            type : Number
-        }
+            type : Number,
+            default : 0
+        },
     },
     date:{
         type:Date,
