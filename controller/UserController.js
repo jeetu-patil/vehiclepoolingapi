@@ -75,7 +75,7 @@ exports.verifyEmail = (request, response) => {
     )
         .then((result) => {
             if (result.modifiedCount) {
-                return response.status(202).json({ message: "Your Account is verified . Now you can login" });
+                return response.render("confirm.ejs");
             }
         })
         .catch((err) => {
