@@ -1,4 +1,5 @@
 const PublishRide=require("../model/PublishRide");
+const { validationResult } = require("express-validator");
 const User=require("../model/User");
 const cloudinary=require("cloudinary");
 
@@ -10,6 +11,9 @@ cloudinary.config({
 
 
 exports.checkUserRidePublish= (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
     User.findOne({_id:request.params.id})
     .then(result=>{
         if(result.publishRideCount>0)
@@ -23,6 +27,9 @@ exports.checkUserRidePublish= (request, response) => {
 
 
 exports.firstPublishRide= async (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
     let vehicleImage="";
     let licenseImage="";
     if(request.files)
@@ -57,5 +64,7 @@ exports.firstPublishRide= async (request, response) => {
 };
 
 exports.publishRide= (request, response) => {
-
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
 };
