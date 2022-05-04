@@ -3,8 +3,9 @@ const { validationResult } = require("express-validator");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const config = require('config');
+const otpGenerator = require('otp-generator');
+const fast2sms = require("fast-two-sms");
 let jwt = require("jsonwebtoken");
-const exp = require("constants");
 var key = "password";
 var algo = "aes256";
 
@@ -43,7 +44,7 @@ exports.signUp = (request, response) => {
                 to: request.body.email,
                 subject: "Confirm your account on Chalo saath chale",
                 html:
-                    '<p>Thanks for signing up with Book-Your-Meal! You must follow this link within 30 days of registration to activate your account:</p><a href= "http://localhost:3000/user/verify-account/' +
+                    '<p>Thanks for signing up with Book-Your-Meal! You must follow this link within 30 days of registration to activate your account:</p><a href= "http://localhost:3000/user/verify-email/' +
                     result._id +
                     '">click here to verify your account</a><p>Have fun, and dont hesitate to contact us with your feedback</p><br><p> The Book-Us-Meal Team</p><a href="https://book-your-meal.herokuapp.com/">book-your-meal.herokuapp.com/</a>'
             };
@@ -65,7 +66,7 @@ exports.signUp = (request, response) => {
         });
 };
 
-exports.verify = (request, response) => {
+exports.verifyEmail = (request, response) => {
     User.updateOne(
         { _id: request.params.id },
         {
@@ -83,6 +84,16 @@ exports.verify = (request, response) => {
         });
 };
 
+exports.verifyMobile = (request,response)=>{
+    let otp = otpGenerator.generate(4, { lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
+    var option = {
+        authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
+        message: otp + " is your OTP to verify your phone number."
+        , numbers: [request.body.mobile]
+    }
+    fast2sms.sendMessage(option);
+    return response.status(200).json({otp : otp});
+}
 
 exports.signIn = (request, response) => {
     // const errors = validationResult(request);

@@ -21,12 +21,14 @@ router.post("/signup",userController.signUp);
     // body("age").isNumeric(),
     // body("gender")
     // )
-router.get("/verify-account/:id",userController.verify);
+router.get("/verify-email/:id",userController.verifyEmail);
 
 router.post("/signin",userController.signIn);
 
 router.get("/view-profile/:id",userController.viewProfile);
 
 router.post("/edit-profile",userController.editProfile);
+
+router.post("/verify-mobile",userController.verifyMobile);
 
 module.exports = router;
