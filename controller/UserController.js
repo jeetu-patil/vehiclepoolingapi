@@ -22,6 +22,7 @@ exports.signUp = (request, response) => {
         name: request.body.name,
         email: request.body.email,
         password: encrypted,
+        mobile: request.body.mobile,
         age: request.body.age,
         gender: request.body.gender,
         aadharCard: request.body.aadhar,
@@ -57,7 +58,6 @@ exports.signUp = (request, response) => {
                 }
             });
 
-            console.log(result);
             return response.status(200).json(result);
         })
         .catch((err) => {
@@ -85,13 +85,15 @@ exports.verifyEmail = (request, response) => {
 };
 
 exports.verifyMobile = (request,response)=>{
+    console.log(request.body.params);
     let otp = otpGenerator.generate(4, { lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
     var option = {
         authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
         message: otp + " is your OTP to verify your phone number."
-        , numbers: [request.body.mobile]
+        , numbers: [request.params.mobile]
     }
     fast2sms.sendMessage(option);
+    console.log(otp);
     return response.status(200).json({otp : otp});
 }
 
@@ -166,7 +168,20 @@ exports.editProfile = (request, response) => {
       });
 };
   
-  
+
+exports.confirmMobileVerification= (request, response) => {
+    User.updateOne({mobile: request.params.mobile},
+        {
+            isMobileVerified:true
+        }    
+    )
+    .then(result=>{
+        return response.status(200).json(result);
+    })
+    .catch((err) => {
+        return response.status(500).json(err);
+    });
+};
 
 
 
