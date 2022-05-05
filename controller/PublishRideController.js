@@ -3,6 +3,8 @@ const { validationResult } = require("express-validator");
 const User=require("../model/User");
 const cloudinary=require("cloudinary");
 const bookRide=require("../model/BookRide");
+const otpGenerator = require('otp-generator');
+const fast2sms = require("fast-two-sms");
 
 cloudinary.config({ 
     cloud_name: 'dfhuhxrw3', 
@@ -11,6 +13,7 @@ cloudinary.config({
   });
 
 
+//check it is first ride or not
 exports.checkUserRidePublish= (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty())
@@ -26,7 +29,7 @@ exports.checkUserRidePublish= (request, response) => {
     });
 };
 
-
+//if it is first ride then he/she fill some detail one time
 exports.firstPublishRide= async (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty())
@@ -64,20 +67,22 @@ exports.firstPublishRide= async (request, response) => {
     });
 };
 
+
+//here publisher pusblish ride
 exports.publishRide= (request, response) => {
+    var data;
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours();//.getMinutes().getSeconds();
-    //var time=today.toLocaleTimeString();
-    // console.log(date);
-    // console.log(request.body);
-    // console.log(time)
+    var time = today.getHours();
+
+    var datum = Date.parse(request.body.rideDate+","+request.body.rideTime);
+    console.log(datum)
+
     PublishRide.create({
         publisherId:request.body.publisherId,
         fromId:request.body.fromId,
         toId:request.body.toId,
-        rideDate: request.body.rideDate,
-        rideTime: time,
+        rideDate:datum,
         seatAvailable: request.body.seatAvailable,
         distance: request.body.distance,
         totalAmount: request.body.totalAmount,
@@ -87,7 +92,24 @@ exports.publishRide= (request, response) => {
         msgForBooker: request.body.msgForBooker
     })
     .then(result => {
-        return response.status(200).json(result);
+        data=result;
+        User.findOne({_id:request.body.publisherId})
+        .then(result => {
+            User.updateOne({_id:request.body.publisherId},
+                {
+                    publishRideCount:result.publishRideCount+1
+                }    
+            )
+            .then(result => {
+                return response.status(200).json(data);
+            })
+            .catch(err => {
+                return response.status(500).json(err);
+            });
+        })
+        .catch(error=>{
+            return response.status(500).json(err);
+        });
     })
     .catch(err => {
         return response.status(500).json(err);
@@ -95,9 +117,10 @@ exports.publishRide= (request, response) => {
 };
 
 
+//here booker request to the publisher
 exports.requestForPublisher= async (request, response) => {
     let result=await PublishRide.findOne({publisherId: request.body.publisherId});
-    result.request.push(request.body.bookerId);
+    result.publisherRequest.push(request.body.bookerId);
     result.save()
     .then(result => {
         return response.status(200).json(result);
@@ -107,15 +130,68 @@ exports.requestForPublisher= async (request, response) => {
     });
 };
 
+
+//here we display all available publisher
 exports.allPublishRidesForUser= (request, response) => {
-    PublishRide.find({isBooked:false})
+    PublishRide.find({isBooked:false,rideDate:{$gt:Date.now()}})
+    .populate("publisherId").populate("fromId").populate("toId")
     .then((result) => {
         return response.status(200).json(result);
     })
-    .cache(error => {
+    .catch(err => {
         return response.status(500).json(err);
     });
     const errors = validationResult(request);
     if (!errors.isEmpty())
         return response.status(400).json({ errors: errors.array() });
+};
+
+
+//showing request to the publisher
+exports.showRequestToThePublisher=(request, response)=> {
+    PublishRide.findOne({publisherId: request.params.publisherId})
+    .populate("request")
+    .then(result=> {
+        return response.status(200).json(result.request);
+    })
+    .catch(err=> {
+        return response.status(500).json(err);
+    });
+};
+
+//if publisher decline request of booker
+exports.declineRequestOfBooker= (request, response) => {
+    User.findOne({_id:request.params.bookerId})
+    .then(result=> {
+        let otp = otpGenerator.generate({ lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
+        var option = {
+            authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
+            message:"Your Request For The Ride Is Declined Please Find Other Ride"
+            , numbers: [result.mobile]
+        }
+        fast2sms.sendMessage(option);
+
+        PublishRide.findOne({publisherId:request.params.publisherId})
+        .then(answer => {
+            answer.request.pull(request.params.bookerId);
+            answer.save()
+            .then(result => {
+                return response.status(200).json(result);
+            })
+            .catch(err=>{
+                return response.status(500).json(err);
+            });
+        })
+        .catch(error => {
+            return response.status(500).json(err);
+        });
+    })
+    .catch(err=> {
+        return response.status(500).json(err);
+    });
+};
+
+//if publisher accept booker request 
+exports.acceptRequestOfBooker= (request, response) => {
+  
 };

@@ -22,7 +22,6 @@ exports.signUp = (request, response) => {
         name: request.body.name,
         email: request.body.email,
         password: encrypted,
-        mobile: request.body.mobile,
         age: request.body.age,
         gender: request.body.gender,
         aadharCard: request.body.aadhar,
@@ -57,7 +56,6 @@ exports.signUp = (request, response) => {
                     console.log("SUCCESS===================================\n" + info);
                 }
             });
-
             return response.status(200).json(result);
         })
         .catch((err) => {
@@ -85,7 +83,6 @@ exports.verifyEmail = (request, response) => {
 };
 
 exports.verifyMobile = (request,response)=>{
-    console.log(request.body.params);
     let otp = otpGenerator.generate(4, { lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
     var option = {
         authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
@@ -93,8 +90,17 @@ exports.verifyMobile = (request,response)=>{
         , numbers: [request.params.mobile]
     }
     fast2sms.sendMessage(option);
-    console.log(otp);
-    return response.status(200).json({otp : otp});
+    User.updateOne({_id:request.params.userId},
+        {
+            mobile:request.params.mobile
+        }    
+    )
+    .then(result => {
+        return response.status(200).json({otp : otp});
+    })
+    .catch((err) => {
+        return response.status(500).json(err);
+    });
 }
 
 exports.signIn = (request, response) => {
