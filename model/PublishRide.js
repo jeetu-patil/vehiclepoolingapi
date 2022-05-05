@@ -1,25 +1,22 @@
 const mongoose = require('mongoose');
-const { stdin } = require('nodemon/lib/config/defaults');
+const Schema= mongoose.Schema;
 const publishRideSchema = new mongoose.Schema({
     publisherId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "user"
     },
 
     fromId:{ 
-         type: mongoose.Schema.Types.ObjectId,
+         type:Schema.Types.ObjectId,
          ref:"place"
     },
     toId:{
-        type: mongoose.Schema.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:"place"
     },
     rideDate:{
-     type:Date,
+     type:String,
 
-    },
-    rideTime: {
-        type:Date
     },
     seatAvailable: {
         type:Number,
@@ -38,9 +35,6 @@ const publishRideSchema = new mongoose.Schema({
         trim:true
     },
     isBooked:{
-        type:Boolean
-    },
-    isTimeExpired:{
         type:Boolean
     },
     isCancelled:{
@@ -63,13 +57,13 @@ const publishRideSchema = new mongoose.Schema({
     isRideStarted:{
         type:Boolean
     },
-    request:[
+    publisherRequest:[
          { 
-            type:mongoose.Schema.Types.ObjectId,
+            type:Schema.Types.ObjectId,
             ref:"user"
        } 
     ],
     msgForBooker:{type:String}
-},{ timestamps: true })
+})
 
 module.exports = mongoose.model("publishride",publishRideSchema);

@@ -79,4 +79,4 @@ const userSchema = new mongoose.Schema({
         default:Date.now
     }
 },{ timestamps: true });
-module.exports = mongoose.model("users",userSchema);
+module.exports = mongoose.model("user",userSchema);
