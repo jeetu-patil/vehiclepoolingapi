@@ -13,23 +13,29 @@ var storage = multer.diskStorage(
     }
 );
 var upload = multer({storage : storage});
-router.post("/signup",userController.signUp);
-    // body("name").notEmpty(),
-    // body("email").isEmail().notEmpty(),
-    // body("password","password minimum length must be 6").isLength(6).notEmpty(),
-    // body("mobile").isMobilePhone().notEmpty(),
-    // body("age").isNumeric(),
-    // body("gender")
-    // )
+router.post("/signup",
+    body("name").notEmpty(),
+    body("email").isEmail().notEmpty(),
+    body("password","password minimum length must be 6").isLength(6).notEmpty(),
+    body("mobile").isMobilePhone().notEmpty(),
+    body("age").isNumeric(),
+    body("aadhar").isLength(12),
+    userController.signUp);
 router.get("/verify-email/:id",userController.verifyEmail);
 
-router.post("/signin",userController.signIn);
+router.post("/signin",
+    body("email").isEmail().notEmpty(),
+    userController.signIn);
 
 router.get("/view-profile/:id",userController.viewProfile);
 
-router.post("/edit-profile",userController.editProfile);
+router.post("/edit-profile",
+body("name").notEmpty(),
+body("age").notEmpty().isNumeric(),
+userController.editProfile);
 
-router.get("/verify-mobile/:mobile",userController.verifyMobile);
+router.get("/verify-mobile/:mobile",
+userController.verifyMobile);
 
 router.get("/verifymobile/:mobile",userController.confirmMobileVerification);
 

@@ -98,9 +98,9 @@ exports.verifyMobile = (request,response)=>{
 }
 
 exports.signIn = (request, response) => {
-    // const errors = validationResult(request);
-    // if (!errors.isEmpty())
-    //     return response.status(400).json({ errors: errors.array() });
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array()});
     User.findOne({ email: request.body.email })
         .then((result) => {
             var decipher = crypto.createDecipher(algo, key);

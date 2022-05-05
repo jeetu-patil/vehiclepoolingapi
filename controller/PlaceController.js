@@ -1,6 +1,9 @@
 const Place=require("../model/Place");
-
+const { validationResult } = require("express-validator");
 exports.addPlace = function(request,response) {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+      return response.status(400).json({ errors: errors.array() });
     Place.create({
         place: request.body.place,
         longitude:request.body.longitude,
