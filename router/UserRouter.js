@@ -17,7 +17,6 @@ router.post("/signup",
     body("name").notEmpty(),
     body("email").isEmail().notEmpty(),
     body("password","password minimum length must be 6").isLength(6).notEmpty(),
-    body("mobile").isMobilePhone().notEmpty(),
     body("age").isNumeric(),
     body("aadhar").isLength(12),
     userController.signUp);
@@ -34,7 +33,7 @@ body("name").notEmpty(),
 body("age").notEmpty().isNumeric(),
 userController.editProfile);
 
-router.get("/verify-mobile/:mobile",
+router.get("/verify-mobile/:mobile/:userId",
 userController.verifyMobile);
 
 router.get("/verifymobile/:mobile",userController.confirmMobileVerification);
