@@ -2,6 +2,7 @@ const PublishRide=require("../model/PublishRide");
 const { validationResult } = require("express-validator");
 const User=require("../model/User");
 const cloudinary=require("cloudinary");
+const bookRide=require("../model/BookRide");
 
 cloudinary.config({ 
     cloud_name: 'dfhuhxrw3', 
@@ -64,6 +65,56 @@ exports.firstPublishRide= async (request, response) => {
 };
 
 exports.publishRide= (request, response) => {
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours();//.getMinutes().getSeconds();
+    //var time=today.toLocaleTimeString();
+    // console.log(date);
+    // console.log(request.body);
+    // console.log(time)
+    PublishRide.create({
+        publisherId:request.body.publisherId,
+        fromId:request.body.fromId,
+        toId:request.body.toId,
+        rideDate: request.body.rideDate,
+        rideTime: time,
+        seatAvailable: request.body.seatAvailable,
+        distance: request.body.distance,
+        totalAmount: request.body.totalAmount,
+        amountPerPerson: request.body.amountPerPerson,
+        isBooked: false,
+        ridePublishDate:date,
+        msgForBooker: request.body.msgForBooker
+    })
+    .then(result => {
+        return response.status(200).json(result);
+    })
+    .catch(err => {
+        return response.status(500).json(err);
+    });
+};
+
+
+exports.requestForPublisher= async (request, response) => {
+    let result=await PublishRide.findOne({publisherId: request.body.publisherId});
+    result.request.push(request.body.bookerId);
+    result.save()
+    .then(result => {
+        return response.status(200).json(result);
+    })
+    .catch(err => {
+        return response.status(500).json(err);
+    });
+};
+
+exports.allPublishRidesForUser= (request, response) => {
+    PublishRide.find({isBooked:false})
+    .then((result) => {
+        return response.status(200).json(result);
+    })
+    .cache(error => {
+        return response.status(500).json(err);
+    });
     const errors = validationResult(request);
     if (!errors.isEmpty())
         return response.status(400).json({ errors: errors.array() });

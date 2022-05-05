@@ -17,6 +17,9 @@ const upload=multer({storage:storage});
 router.get("/checkuserride/:id",publishController.checkUserRidePublish);
 router.post("/firstpublishride",upload.array("image"),publishController.firstPublishRide);
 router.post("/publishride",publishController.publishRide);
+router.post("/requestforpublisher",publishController.requestForPublisher);
+
+router.get("/publisherforuser",publishController.allPublishRidesForUser);
 
 
 module.exports =router;
