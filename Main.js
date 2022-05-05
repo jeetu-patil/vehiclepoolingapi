@@ -2,7 +2,6 @@ const express=require('express');
 const cors=require('cors');
 const bodyParser=require('body-parser');
 const mongoose=require('mongoose');
-const path=require('path');
 const app = express();
 
 app.use(cors());
@@ -19,6 +18,7 @@ app.set("view engine","ejs");
 
 mongoose.connect("mongodb+srv://jitu:jitu%40123@cluster0.5msi4.mongodb.net/carpooling?retryWrites=true&w=majority")
 .then(()=>{
+    console.log("database is Connected");
     app.use("/user",userRouter); 
     app.use("/admin",adminRouter);
     app.use("/place",placeRouter);
