@@ -103,6 +103,19 @@ exports.verifyMobile = (request,response)=>{
     });
 }
 
+exports.loginWithGoogle= (request, response) => {
+    User.findOne({email: request.body.email})
+    .then(result=>{
+        let payload = { subject: result._id };
+        let token = jwt.sign(payload, "aabbccdd");
+        return response.status(200).json({status: "Login Success",result: result,token: token});
+    })
+    .catch((err) => {
+        return response.status(500).json(err);
+    });
+};
+
+
 exports.signIn = (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty())
@@ -189,6 +202,14 @@ exports.confirmMobileVerification= (request, response) => {
     });
 };
 
-
+exports.singleUser = (request, response) => {
+    User.findOne({_id: request.params.id})
+    .then((user) => {
+        return response.status(200).json(user);
+    })
+    .catch((err) => {
+        return response.status(500).json(err);
+    });
+};
 
 

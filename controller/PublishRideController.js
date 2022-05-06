@@ -76,7 +76,6 @@ exports.publishRide= (request, response) => {
     var time = today.getHours();
 
     var datum = Date.parse(request.body.rideDate+","+request.body.rideTime);
-    console.log(datum)
 
     PublishRide.create({
         publisherId:request.body.publisherId,
@@ -150,9 +149,9 @@ exports.allPublishRidesForUser= (request, response) => {
 //showing request to the publisher
 exports.showRequestToThePublisher=(request, response)=> {
     PublishRide.findOne({publisherId: request.params.publisherId})
-    .populate("request")
+    .populate("publisherRequest")
     .then(result=> {
-        return response.status(200).json(result.request);
+        return response.status(200).json(result.publisherRequest);
     })
     .catch(err=> {
         return response.status(500).json(err);
@@ -192,6 +191,14 @@ exports.declineRequestOfBooker= (request, response) => {
 };
 
 //if publisher accept booker request 
-exports.acceptRequestOfBooker= (request, response) => {
-  
+exports.acceptRequestOfBooker=async (request, response) => {
+  let publishRider=await PublishRide.findOne({ publisherId: request.params.publisherId});
+  if(publishRider.seatAvailable>0)
+  {
+    
+  }
+  else
+  {
+
+  }
 };
