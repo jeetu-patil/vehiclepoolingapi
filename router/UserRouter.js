@@ -38,4 +38,8 @@ userController.verifyMobile);
 
 router.get("/verifymobile/:mobile",userController.confirmMobileVerification);
 
+router.post("/loginwithgoogle",userController.loginWithGoogle);
+
+router.get("/getuser/:id",userController.singleUser);
+
 module.exports = router;

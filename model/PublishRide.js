@@ -51,9 +51,12 @@ const publishRideSchema = new mongoose.Schema({
         type:Number,
         trim:true
     },
-    otp:{
-        type:Number
-    },
+    otp:[
+        {
+            mobile:{type:Number},
+            otpNumber:{type:Number}
+        }
+    ],
     isRideStarted:{
         type:Boolean
     },
