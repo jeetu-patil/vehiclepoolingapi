@@ -53,7 +53,11 @@ const publishRideSchema = new mongoose.Schema({
     },
     otp:[
         {
-            mobile:{type:Number},
+            bookerId:
+            {
+                type:Schema.Types.ObjectId,
+                ref:"user"
+            },
             otpNumber:{type:Number}
         }
     ],
