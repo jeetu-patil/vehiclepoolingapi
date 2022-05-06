@@ -73,6 +73,7 @@ const userSchema = new mongoose.Schema({
             type : Number,
             default : 0
         },
+        number:{type:String,default:""}
     },
     date:{
         type:Date,

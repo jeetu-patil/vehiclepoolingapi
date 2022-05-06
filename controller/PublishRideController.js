@@ -1,8 +1,10 @@
 const PublishRide=require("../model/PublishRide");
+const BookerHistory=require("../model/BookerHistory");
+const PublisherHistory=require("../model/PublisherHistory");
 const { validationResult } = require("express-validator");
 const User=require("../model/User");
 const cloudinary=require("cloudinary");
-const bookRide=require("../model/BookRide");
+const BookRide=require("../model/BookRide");
 const otpGenerator = require('otp-generator');
 const fast2sms = require("fast-two-sms");
 
@@ -46,6 +48,7 @@ exports.firstPublishRide= async (request, response) => {
 
     let vechile={
         name: request.body.name,
+        number: request.body.number,
         image:vehicleImage,
         wheeler:request.body.wheeler
     }
@@ -192,13 +195,110 @@ exports.declineRequestOfBooker= (request, response) => {
 
 //if publisher accept booker request 
 exports.acceptRequestOfBooker=async (request, response) => {
-  let publishRider=await PublishRide.findOne({ publisherId: request.params.publisherId});
+  let publishRider=await PublishRide.findOne({ publisherId: request.params.publisherId}).populate("publisherId");
+  let booker=await BookRide.findOne({bookerId: request.params.bookerId}).populate("bookerId");
+
   if(publishRider.seatAvailable>0)
   {
-    
-  }
-  else
-  {
+    PublishRide.updateOne({publisherId: request.params.publisherId},
+        {
+            seatAvailable: publishRider.seatAvailable-booker.seatWant,
+        }
+    )
+    .then( async result =>{
+        let otp =otpGenerator.generate(4,{ lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
+        var option = {
+            authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
+            message:"Your request for the ride is accepted and your OTP for the ride is "+otp+". Show this OTP to your publisher to start the ride. Publisher detail - Name : "+publishRider.name+" , Mobile : "+publishRider.mobile+",Vehcile Number :  "+publishRider.publisherId.vehicle.number
+            , numbers: [booker.bookerId.mobile]
+        }
+        await fast2sms.sendMessage(option);
 
+        let tempOtp={
+            bookerId: request.params.bookerId,
+            otpNumber:otp
+        }
+
+        await PublishRide.updateOne({publisherId: request.params.publisherId},
+            {
+                otp:tempOtp
+            }    
+        ).then().catch(err=>{
+            console.log(err);
+        });
+
+        await BookRide.updateOne({bookerId:request.params.bookerId},
+        {
+            publisherId: request.params.publisherId
+        }).then().catch(err=>{
+            console.log(err);
+        });
+
+        await BookRide.updateOne({passangerId:request.params.Id},
+            {
+                isAccepted:true
+        }).then().catch(err=>{
+            console.log(err);
+        });
+
+        await BookerHistory.findOne({bookerId:request.params.bookerId})
+        .then(bh =>{
+            if(!bh){
+                bh=new BookerHistory();
+                bh.bookerId=request.params.bookerId;
+            }
+            bh.publisherId.push(request.params.publisherId);
+            bh.save();
+        }).then().catch(err=>{
+            console.log(err);
+        });
+
+        await PublisherHistory.findOne({publisherId:request.params.publisherId})
+        .then(ph =>{
+            if(!ph){
+                ph=new PublisherHistory();
+                ph.publisherId=request.params.publisherId;
+            }
+            ph.bookerId.push(request.params.bookerId);
+            ph.save().then().catch(err=>{
+                console.log(err);
+            });
+        });
+
+        if(publishRider.seatAvailable>0)
+        {
+            let result=await PublishRide.findOne({publisherId:request.params.publisherId});
+            result.publisherRequest.pull(request.params.bookerId);
+            result.save()
+            .then(result=>{
+                return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name});
+            })
+            .catch(err=>{
+                return response.status(500).json(err);
+            });
+        }
+        else
+        {
+            PublishRide.updateOne({publisherId:request.params.publisherId},
+                {
+                    $set:{
+                        isBooked:true,
+                        publisherRequest:[]
+                    }
+                }    
+            )
+            .then(result=>{
+                return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name});
+            })
+            .catch(err=>{
+                return response.status(500).json(err);
+            });
+        }
+        
+    })
+    .catch(err =>{
+        console.log(err);
+        return response.status(500).json(err);
+    });
   }
 };
