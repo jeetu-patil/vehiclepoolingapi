@@ -12,7 +12,7 @@ var algo = "aes256";
 exports.signUp = (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty())
-        return response.status(400).json({ errors: errors.array() });
+        return response.status(500).json({ errors: errors.array() });
 
     var cipher = crypto.createCipher(algo, key);
     var encrypted =
@@ -70,8 +70,7 @@ exports.verifyEmail = (request, response) => {
         {
             $set: { isEmailVerified: true }
         }
-    )
-        .then((result) => {
+    ).then((result) => {
             if (result.modifiedCount) {
                 return response.render("confirm.ejs");
             }
@@ -139,21 +138,20 @@ exports.signIn = (request, response) => {
                         });
                 }
                 else
-                    return response.status(202).json({ message: "Invalid Password" });
+                    return response.status(401).json({ message: "Invalid Password" });
             }
             else
-                return response.status(500).json({ message: "Please verify your accout first then login" });
+                return response.status(401).json({ message: "Please verify your accout first then login" });
         })
         .catch((err) => {
             console.log(err);
-            return response.status(401).json(err);
+            return response.status(500).json(err);
         });
 };
 
-
 exports.editProfile = (request, response) => {
     const errors = validationResult(request);
-    if (!errors.isEmpty())
+    if (!errors.isEmpty())  
       return response.status(400).json({ errors: errors.array() });
     User.updateOne(
       { _id: request.body.userId },
