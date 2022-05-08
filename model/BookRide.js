@@ -16,6 +16,6 @@ const bookRideSchema=mongoose.Schema({
     rating:{type:Number,default:0},
     feedback:{type:String,default:""},
     isAccepted:{type:Boolean,default:false},
-}); 
+},{timeStamps:true}); 
 
 module.exports = mongoose.model("bookride",bookRideSchema);

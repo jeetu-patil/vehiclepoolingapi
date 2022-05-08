@@ -40,4 +40,6 @@ router.post("/loginwithgoogle",userController.loginWithGoogle);
 
 router.get("/getuser/:id",userController.singleUser);
 
+router.post("/addcomment", userController.addComment);
+
 module.exports = router;

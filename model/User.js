@@ -78,6 +78,17 @@ const userSchema = new mongoose.Schema({
     date:{
         type:Date,
         default:Date.now
-    }
-},{ timestamps: true });
+    },
+    commentAndRating:[
+        {
+            userId:
+            {
+                type:Schema.Types.ObjectId,
+                ref:"user"
+            },
+            rating:{type:Number},
+            feedback:{type:String}
+        }
+    ]
+});
 module.exports = mongoose.model("user",userSchema);

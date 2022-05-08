@@ -15,6 +15,8 @@ const placeRouter=require("./router/PlaceRouter");
 const userRouter = require("./router/UserRouter");
 const publishRideRouter=require("./router/PublishRideRouter");
 const bookRideRouter = require("./router/BookRideRouter");
+const bookerHistoryRouter = require("./router/BookerHistoryRouter");
+const publisherHistoryRouter=require("./router/PublisherHistoryRouter");
 app.set("view engine","ejs");
 
 mongoose.connect("mongodb+srv://jitu:jitu%40123@cluster0.5msi4.mongodb.net/carpooling?retryWrites=true&w=majority")
@@ -25,6 +27,8 @@ mongoose.connect("mongodb+srv://jitu:jitu%40123@cluster0.5msi4.mongodb.net/carpo
     app.use("/place",placeRouter);
     app.use("/publishride",publishRideRouter);
     app.use("/bookride",bookRideRouter);
+    app.use("/bookerhistory",bookerHistoryRouter);
+    app.use("/publisherhistory",publisherHistoryRouter);
 })
 .catch(err => {
 

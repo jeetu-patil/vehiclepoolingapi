@@ -43,14 +43,6 @@ const publishRideSchema = new mongoose.Schema({
     ridePublishDate:{
         type:Date
     },
-    feedback:{
-        type:String,
-        trim:true
-    },
-    rating:{
-        type:Number,
-        trim:true
-    },
     otp:[
         {
             bookerId:
@@ -71,6 +63,6 @@ const publishRideSchema = new mongoose.Schema({
        } 
     ],
     msgForBooker:{type:String}
-})
+},{timeStamps:true})
 
 module.exports = mongoose.model("publishride",publishRideSchema);

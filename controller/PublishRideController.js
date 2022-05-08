@@ -75,9 +75,8 @@ exports.publishRide= (request, response) => {
     var data;
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours();
 
-    var datum = Date.parse(request.body.rideDate+","+request.body.rideTime);
+    var datum = Date.parse(request.body.rideDate+","+request.body.rideTime+":00");
 
     PublishRide.create({
         publisherId:request.body.publisherId,
@@ -140,11 +139,9 @@ exports.allPublishRidesForUser= (request, response) => {
         return response.status(200).json(result);
     })
     .catch(err => {
+        console.log(err);
         return response.status(500).json(err);
     });
-    const errors = validationResult(request);
-    if (!errors.isEmpty())
-        return response.status(400).json({ errors: errors.array() });
 };
 
 
@@ -300,4 +297,24 @@ exports.acceptRequestOfBooker=async (request, response) => {
         return response.status(500).json(err);
     });
   }
+};
+
+
+exports.cancelRide= async (request, response) => {
+    await PublishRide.updateOne({publisherId:request.params.publisherId},
+        {
+            $set:{
+                isBooked:true,
+                publisherRequest:[]
+            }
+        }    
+    );
+
+    let otp =otpGenerator.generate(4,{ lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
+    var option = {
+        authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
+        message:"Your Request Cancelled By Publisher"
+        , numbers: [booker.bookerId.mobile]
+    }
+    await fast2sms.sendMessage(option);
 };

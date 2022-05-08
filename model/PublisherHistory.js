@@ -7,6 +7,6 @@ const publisherSchema=new mongoose.Schema({
     bookerId:[
         {type:schema.Types.ObjectId,ref:'user'}
     ]    
-});
+},{timeStamps:true});
 
 module.exports=mongoose.model('publisherhistory',publisherSchema);

@@ -5,6 +5,6 @@ const placeSchema=mongoose.Schema({
     longitude:String,
     latitude:String,
     description:String
-});
+},{timeStamps:true});
 
 module.exports=mongoose.model("place",placeSchema);

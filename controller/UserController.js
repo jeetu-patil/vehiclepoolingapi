@@ -125,6 +125,7 @@ exports.signIn = (request, response) => {
             var decrypted =
                 decipher.update(result.password, "hex", "utf8") +
                 decipher.final("utf8");
+                console.log(decrypted);
             if (result.isEmailVerified == true) {
                 if (decrypted == request.body.password) {
                     let payload = { subject: result._id };
@@ -194,7 +195,7 @@ exports.confirmMobileVerification= (request, response) => {
 };
 
 exports.singleUser = (request, response) => {
-    User.findOne({_id: request.params.id})
+    User.findOne({_id: request.params.id}).populate("commentAndRating")
     .then((user) => {
         return response.status(200).json(user);
     })
@@ -203,4 +204,21 @@ exports.singleUser = (request, response) => {
     });
 };
 
-
+exports.addComment= (request, response) => {
+    let comment={
+        userId: request.body.userId,
+        rating: request.body.rating,
+        feedback: request.body.feedback,
+    };
+    User.updateOne({_id: request.body.uId},
+        {
+            commentAndRating:comment
+        }    
+    )
+    .then(result => {
+        return response.status(200).json(result);
+    })
+    .catch(err =>{
+        return response.status(500).json(err);
+    });
+};
