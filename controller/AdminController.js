@@ -1,4 +1,6 @@
 const Admin=require("../model/Admin");
+const PublishRide = require("../model/PublishRide");
+const BookRide = require("../model/BookRide");
 const { validationResult } = require("express-validator");
 
 exports.signin=(request,response) => {
@@ -13,3 +15,19 @@ exports.signin=(request,response) => {
         return response.status(500).json(err);
     });
 };
+
+exports.publishedRides= (request,response)=>{
+    PublishRide.find().then((result) => {
+        return response.status(200).json(result);
+    }).catch((err) => {
+        return response.status(500).json(err);
+    });
+}
+
+exports.bookRides= (request,response)=>{
+    BookRide.find().then((result) => {
+        return response.status(200).json(result);
+    }).catch((err) => {
+        return response.status(500).json(err);
+    });
+}

@@ -12,7 +12,6 @@ cloudinary.config({
     api_secret: 'zzSd8ptSYG-MS7hRnE-Ab46Bmts' 
   });
 
-
 //check it is first ride or not
 exports.checkUserRidePublish= (request, response) => {
     const errors = validationResult(request);

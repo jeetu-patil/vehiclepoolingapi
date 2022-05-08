@@ -26,8 +26,6 @@ router.post("/signin",
     body("email").isEmail().notEmpty(),
     userController.signIn);
 
-router.get("/view-profile/:id",userController.viewProfile);
-
 router.post("/edit-profile",
 body("name").notEmpty(),
 body("age").notEmpty().isNumeric(),

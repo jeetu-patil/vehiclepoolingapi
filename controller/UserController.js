@@ -148,17 +148,9 @@ exports.signIn = (request, response) => {
         });
 };
 
-exports.viewProfile = (request,response)=>{
-    User.findOne({_id : request.params.id}).then((result) => {
-        return response.status(201).json(result);
-    }).catch((err) => {
-        return response.status(500).json(err);
-    });
-}
-
 exports.editProfile = (request, response) => {
     const errors = validationResult(request);
-    if (!errors.isEmpty())
+    if (!errors.isEmpty())  
       return response.status(400).json({ errors: errors.array() });
     User.updateOne(
       { _id: request.body.userId },
