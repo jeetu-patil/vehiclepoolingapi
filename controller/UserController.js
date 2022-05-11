@@ -26,8 +26,7 @@ exports.signUp = (request, response) => {
         gender: request.body.gender,
         aadharCard: request.body.aadhar,
     });
-    user
-        .save()
+    user.save()
         .then((result) => {
             let transporter = nodemailer.createTransport({
                 host: "smtp.gmail.com",

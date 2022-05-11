@@ -7,6 +7,8 @@ const cloudinary=require("cloudinary");
 const BookRide=require("../model/BookRide");
 const otpGenerator = require('otp-generator');
 const fast2sms = require("fast-two-sms");
+const Place = require("../model/Place");
+
 
 cloudinary.config({ 
     cloud_name: 'dfhuhxrw3', 
@@ -36,13 +38,10 @@ exports.firstPublishRide= async (request, response) => {
     if (!errors.isEmpty())
         return response.status(400).json({ errors: errors.array() });
     let vehicleImage="";
-    let licenseImage="";
-    if(request.files)
+    if(request.file)
     { 
-        var result=await cloudinary.v2.uploader.upload(request.files[0].path);
+        var result=await cloudinary.v2.uploader.upload(request.file.path);
         vehicleImage=result.url;
-        result=await cloudinary.v2.uploader.upload(request.files[1].path);
-        licenseImage=result.url;
     }
 
     let vechile={
@@ -53,11 +52,8 @@ exports.firstPublishRide= async (request, response) => {
     }
     User.updateOne({_id:request.body.userId},
         {
-            $set:
-            {
-                drivingLicense:licenseImage,
-                vehicle:vechile,
-            }
+            vehicle:vechile,
+            
         }    
     )
     .then((result) => {
@@ -85,7 +81,7 @@ exports.publishRide= (request, response) => {
         rideDate:datum,
         seatAvailable: request.body.seatAvailable,
         distance: request.body.distance,
-        totalAmount: request.body.totalAmount,
+        totalAmount: 0,
         amountPerPerson: request.body.amountPerPerson,
         isBooked: false,
         ridePublishDate:date,
@@ -225,14 +221,16 @@ exports.acceptRequestOfBooker=async (request, response) => {
 
         await BookRide.updateOne({bookerId:request.params.bookerId},
         {
-            publisherId: request.params.publisherId
+            publisherId: request.params.publisherId,
+            totalAmount:booker.seatWant*publishRider.amountPerPerson,
+            isAccepted:true
         }).then().catch(err=>{
             console.log(err);
         });
 
-        await BookRide.updateOne({passangerId:request.params.Id},
+        await publishRider.updateOne({publisherId:request.params.publisherId},
             {
-                isAccepted:true
+                totalAmount:booker.seatWant*publishRider.amountPerPerson+publishRider.totalamount
         }).then().catch(err=>{
             console.log(err);
         });
@@ -272,23 +270,24 @@ exports.acceptRequestOfBooker=async (request, response) => {
             .catch(err=>{
                 return response.status(500).json(err);
             });
-        }
-        else
-        {
-            PublishRide.updateOne({publisherId:request.params.publisherId},
-                {
-                    $set:{
-                        isBooked:true,
-                        publisherRequest:[]
-                    }
-                }    
-            )
-            .then(result=>{
-                return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name});
-            })
-            .catch(err=>{
-                return response.status(500).json(err);
-            });
+
+            if(publishRider.seatAvailable<=0)
+            {
+                PublishRide.updateOne({publisherId:request.params.publisherId},
+                    {
+                        $set:{
+                            isBooked:true,
+                            publisherRequest:[]
+                        }
+                    }    
+                )
+                .then(result=>{
+                    return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name});
+                })
+                .catch(err=>{
+                    return response.status(500).json(err);
+                });
+            }
         }
         
     })
@@ -299,12 +298,19 @@ exports.acceptRequestOfBooker=async (request, response) => {
   }
 };
 
-
+//if publisher cancel ride
 exports.cancelRide= async (request, response) => {
+    let pr=await PublishRide.findOne({ publisherId: request.params.publisherId});
+
+    let temp=[];
+    for(let i=0; i<pr.publisherRequest; i++) {
+        temp[i]=pr.publisherRequest[i];
+    }
+
     await PublishRide.updateOne({publisherId:request.params.publisherId},
         {
             $set:{
-                isBooked:true,
+                isCancelled:true,
                 publisherRequest:[]
             }
         }    
@@ -313,8 +319,51 @@ exports.cancelRide= async (request, response) => {
     let otp =otpGenerator.generate(4,{ lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
     var option = {
         authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
-        message:"Your Request Cancelled By Publisher"
-        , numbers: [booker.bookerId.mobile]
+        message:"Your Request Cancelled By Publisher , PLease find onother ride .  Sorry for your inconvenience.."
+        , numbers: [temp]
     }
     await fast2sms.sendMessage(option);
+};
+
+//Here we fetch particular ride
+exports.getParticualRideRequest= (request, response) => {
+    PublishRide.findOne({_id:request.params.id})
+    .populate("publisherId").populate("fromId").populate("toId")
+    .then(result=>{
+        return response.status(200).json(result);
+    })
+    .catch(err => {
+        return response.status(500).json(err);
+    });
+};
+
+
+//all rides for booker according to date
+exports.getRidesForBooker= (request, response) => {
+    totalRides=[];
+    PublishRide.find({fromId:request.body.from,toId:request.body.to})
+    .populate("publisherId").populate("fromId").populate("toId")
+    .then((rides) => {
+        if(rides.length>0)
+        {
+            statusRide=false;
+            let d = new Date( rides[0].rideDate );
+            date = d.toDateString();
+
+            for(let i = 0; i <rides.length;i++) {
+                if(date==new Date(request.body.date).toDateString() && rides[i].seatAvailable>=request.body.seat) {
+                    statusRide =true;
+                    totalRides[i]=rides[i];
+                }
+            }
+
+            if(statusRide)
+                return response.status(200).json(totalRides);
+        }
+        return response.status(200).json(totalRides);
+    })
+    .catch(err => {
+        console.log(err);
+        return response.status(500).json(err);
+    });
 };
