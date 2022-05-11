@@ -1,5 +1,6 @@
 const Admin=require("../model/Admin");
 const PublishRide = require("../model/PublishRide");
+const User = require("../model/User");
 const BookRide = require("../model/BookRide");
 const { validationResult } = require("express-validator");
 
@@ -16,18 +17,34 @@ exports.signin=(request,response) => {
     });
 };
 
-exports.publishedRides= (request,response)=>{
-    PublishRide.find().then((result) => {
-        return response.status(200).json(result);
-    }).catch((err) => {
-        return response.status(500).json(err);
-    });
+exports.userList = (request,response)=>{
+   User.find().then((result) => {
+       return response.status(200).json(result);
+   }).catch((err) => {
+       return response.status(500).json(err);
+   });
 }
 
-exports.bookRides= (request,response)=>{
-    BookRide.find().then((result) => {
+exports.allPublishRidesForUser= (request, response) => {
+    PublishRide.find()
+    .populate("publisherId").populate("fromId").populate("toId")
+    .then((result) => {
         return response.status(200).json(result);
-    }).catch((err) => {
+    })
+    .catch(err => {
+        console.log(err);
+        return response.status(500).json(err);
+    });
+};
+
+exports.bookRides= (request,response)=>{
+    BookRide.find()
+    .populate("publisherId").populate("bookerId")
+    .then((result) => {
+        return response.status(200).json(result);
+    })
+    .catch(err => {
+        console.log(err);
         return response.status(500).json(err);
     });
 }

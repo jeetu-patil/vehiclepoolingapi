@@ -126,7 +126,7 @@ exports.signIn = (request, response) => {
                 decipher.update(result.password, "hex", "utf8") +
                 decipher.final("utf8");
                 console.log(decrypted);
-            if (result.isEmailVerified == true) {
+            if (result.isEmailVerified == true && result.isMobileVerified == true) {
                 if (decrypted == request.body.password) {
                     let payload = { subject: result._id };
                     let token = jwt.sign(payload, "aabbccdd");
