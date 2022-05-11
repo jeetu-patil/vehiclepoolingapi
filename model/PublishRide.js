@@ -16,7 +16,6 @@ const publishRideSchema = new mongoose.Schema({
     },
     rideDate:{
      type:String,
-
     },
     seatAvailable: {
         type:Number,
