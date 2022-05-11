@@ -17,7 +17,7 @@ const upload=multer({storage:storage});
 router.get("/checkuserride/:id",publishController.checkUserRidePublish);
 
 //if it is first ride then he/she fill some detail one time
-router.post("/firstpublishride",upload.array("image"),publishController.firstPublishRide);
+router.post("/firstpublishride",upload.single("image"),publishController.firstPublishRide);
 
 //here publisher pusblish ride
 router.post("/publishride",publishController.publishRide);
@@ -39,4 +39,13 @@ router.get("/acceptrequestofbooker/:bookerId/:publisherId",publishController.acc
 
 //if publisher cancelled ride
 router.get("/cancellride",publishController.cancelRide);
+
+
+//Particular ride request
+router.get("/particualride/:id",publishController.getParticualRideRequest);
+
+
+//all rides for booker according to date
+router.post("/ridesforbooker",publishController.getRidesForBooker);
+
 module.exports =router;
