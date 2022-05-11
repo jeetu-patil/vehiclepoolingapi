@@ -31,7 +31,7 @@ mongoose.connect("mongodb+srv://jitu:jitu%40123@cluster0.5msi4.mongodb.net/carpo
     app.use("/publisherhistory",publisherHistoryRouter);
 })
 .catch(err => {
-
+   console.log(err);
 });
 
 app.listen(3000,()=>{
