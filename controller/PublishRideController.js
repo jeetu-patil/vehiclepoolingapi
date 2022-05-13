@@ -306,7 +306,9 @@ exports.acceptRequestOfBooker=async (request, response) => {
 //showing all accept user by publisher
 exports.showAllAcceptRequestByPublisher= (request, response) => {
     PublishRide.findOne({publisherId: request.params.publisherId})
+    .populate("otp.bookerId")
     .then(result => {
+        console.log(result)
         return response.status(200).json(result);
     })
     .catch(err => {
@@ -320,45 +322,65 @@ exports.matchOtp= async (request, response) => {
     var status=false;
     var publisher=await PublishRide.findOne({publisherId: request.body.publisherId});
     var bookerId;
-    for(var i=0;publisher.otp.length;i++) {
-        if(request.body.otp==publisher.otp[i].otpNumber)
+    var id;
+    for(var i=0;i<publisher.otp.length;i++) {
+        t=parseInt(request.body.otp);
+        if(t==publisher.otp[i].otpNumber)
         {
             status=true;
+            console.log("1")
             bookerId=publisher.otp[i].bookerId;
+            id=publisher.otp[i]._id
+            console.log("2")
             break;
         }
     }
 
+    console.log(bookerId);
+    console.log(id)
+    console.log("3")
     if(status){
-        publisher.otp.pull(request.body.otp);
+        console.log("4")
+        publisher.otp.pull(id);
         publisher.save()
         .then(async result=>{
+            console.log("5")
             await BookerHistory.findOne({bookerId:bookerId})
             .then(bh =>{
                 if(!bh){
+                    console.log("6")
                     bh=new BookerHistory();
                     bh.bookerId=bookerId;
+                    console.log("7")
                 }
-                bh.publisherId.push(request.params.publisherId);
-                bh.save();
-            }).then().catch(err=>{
-                console.log(err);
+                bh.publisherId.push(request.body.publisherId);
+                bh.save().then().catch(err=>{
+                    console.log(err);
+                });
+            }).catch((err)=>{
+
             });
 
-            await PublisherHistory.findOne({publisherId:request.params.publisherId,_id:request.body.rideId})
+            console.log("8")
+            await PublisherHistory.findOne({publisherId:request.body.publisherId,_id:request.body.rideId})
             .then(ph =>{
                 if(!ph){
                     ph=new PublisherHistory();
-                    ph.publisherId=request.params.publisherId;  
+                    ph.publisherId=request.body.publisherId;  
                 }
                 ph.bookerId.push(bookerId);
-                ph.save().then().catch(err=>{
+                ph.save().then(result=>{
+                    console.log("9")
+                }).catch(err=>{
                     console.log(err);
                 });
             });
+
+            return response.status(200).json({msg:"Success"});
         })
         .catch(error=>{
-            return response.status(500).jsom(error);
+            console.log(error);
+            return response.status(500).json(error);
         });
     }
 };
