@@ -48,3 +48,11 @@ exports.bookRides= (request,response)=>{
         return response.status(500).json(err);
     });     
 }
+
+// exports.publisherCancelledRides = (request,response)=>{
+//      PublishRide.find({isCancelled:true}).then((result) => {
+         
+//      }).catch((err) => {
+         
+//      });
+// }
