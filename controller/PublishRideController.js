@@ -85,6 +85,7 @@ exports.publishRide= (request, response) => {
         amountPerPerson: request.body.amountPerPerson,
         isBooked: false,
         ridePublishDate:date,
+        totalSeat: request.body.seatAvailable,
         msgForBooker: request.body.msgForBooker
     })
     .then(result => {
@@ -115,7 +116,9 @@ exports.publishRide= (request, response) => {
 
 //here booker request to the publisher
 exports.requestForPublisher= async (request, response) => {
+    console.log(request.body)
     let result=await PublishRide.findOne({publisherId: request.body.publisherId});
+    console.log(result);
     result.publisherRequest.push(request.body.bookerId);
     result.save()
     .then(result => {
@@ -141,14 +144,28 @@ exports.allPublishRidesForUser= (request, response) => {
 };
 
 
+//here get all publish rides of particular user
+exports.getPublishRidesOfSingle= (request, response) => {
+    PublishRide.find({publisherId: request.params.publisherId})
+    .populate("publisherRequest").populate("fromId").populate("toId")
+    .then((result) =>{
+        return response.status(200).json(result);
+    })
+    .catch((err) => {
+        return response.status(500).json(err);
+    });
+};
+
+
 //showing request to the publisher
 exports.showRequestToThePublisher=(request, response)=> {
-    PublishRide.findOne({publisherId: request.params.publisherId})
-    .populate("publisherRequest")
+    PublishRide.findOne({publisherId: request.params.publisherId,_id:request.params.rideId})
+    .populate("publisherRequest").populate("fromId").populate("toId")
     .then(result=> {
-        return response.status(200).json(result.publisherRequest);
+        return response.status(200).json(result);
     })
     .catch(err=> {
+        console.log(err)
         return response.status(500).json(err);
     });
 };
@@ -169,8 +186,18 @@ exports.declineRequestOfBooker= (request, response) => {
         .then(answer => {
             answer.request.pull(request.params.bookerId);
             answer.save()
-            .then(result => {
-                return response.status(200).json(result);
+            .then(async result => {
+                BookRide.updateOne({bookerId:result.params.bookerId},
+                    {
+                        publisherId:null
+                    }    
+                )
+                .then(result => {
+                    return response.status(200).json(result);
+                })
+                .catch(err => {
+                    return response.status(500).json(err);
+                });   
             })
             .catch(err=>{
                 return response.status(500).json(err);
@@ -235,30 +262,6 @@ exports.acceptRequestOfBooker=async (request, response) => {
             console.log(err);
         });
 
-        await BookerHistory.findOne({bookerId:request.params.bookerId})
-        .then(bh =>{
-            if(!bh){
-                bh=new BookerHistory();
-                bh.bookerId=request.params.bookerId;
-            }
-            bh.publisherId.push(request.params.publisherId);
-            bh.save();
-        }).then().catch(err=>{
-            console.log(err);
-        });
-
-        await PublisherHistory.findOne({publisherId:request.params.publisherId})
-        .then(ph =>{
-            if(!ph){
-                ph=new PublisherHistory();
-                ph.publisherId=request.params.publisherId;
-            }
-            ph.bookerId.push(request.params.bookerId);
-            ph.save().then().catch(err=>{
-                console.log(err);
-            });
-        });
-
         if(publishRider.seatAvailable>0)
         {
             let result=await PublishRide.findOne({publisherId:request.params.publisherId});
@@ -297,6 +300,70 @@ exports.acceptRequestOfBooker=async (request, response) => {
     });
   }
 };
+
+
+
+//showing all accept user by publisher
+exports.showAllAcceptRequestByPublisher= (request, response) => {
+    PublishRide.findOne({publisherId: request.params.publisherId})
+    .then(result => {
+        return response.status(200).json(result);
+    })
+    .catch(err => {
+        return response.status(500).json(err);
+    });
+};
+
+
+//match otp which provide by user to the publisher
+exports.matchOtp= async (request, response) => {
+    var status=false;
+    var publisher=await PublishRide.findOne({publisherId: request.body.publisherId});
+    var bookerId;
+    for(var i=0;publisher.otp.length;i++) {
+        if(request.body.otp==publisher.otp[i].otpNumber)
+        {
+            status=true;
+            bookerId=publisher.otp[i].bookerId;
+            break;
+        }
+    }
+
+    if(status){
+        publisher.otp.pull(request.body.otp);
+        publisher.save()
+        .then(async result=>{
+            await BookerHistory.findOne({bookerId:bookerId})
+            .then(bh =>{
+                if(!bh){
+                    bh=new BookerHistory();
+                    bh.bookerId=bookerId;
+                }
+                bh.publisherId.push(request.params.publisherId);
+                bh.save();
+            }).then().catch(err=>{
+                console.log(err);
+            });
+
+            await PublisherHistory.findOne({publisherId:request.params.publisherId,_id:request.body.rideId})
+            .then(ph =>{
+                if(!ph){
+                    ph=new PublisherHistory();
+                    ph.publisherId=request.params.publisherId;  
+                }
+                ph.bookerId.push(bookerId);
+                ph.save().then().catch(err=>{
+                    console.log(err);
+                });
+            });
+        })
+        .catch(error=>{
+            return response.status(500).jsom(error);
+        });
+    }
+};
+ 
+
 
 //if publisher cancel ride
 exports.cancelRide= async (request, response) => {
