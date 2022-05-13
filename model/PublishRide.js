@@ -19,8 +19,9 @@ const publishRideSchema = new mongoose.Schema({
     },
     seatAvailable: {
         type:Number,
-        trim:true
+        default:0
     },
+    totalSeat: {type:Number,default:0},
     distance:{
          type:Number,
          trim:true

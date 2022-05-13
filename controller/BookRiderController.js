@@ -1,8 +1,17 @@
 const BookRide= require("../model/BookRide");
 const { validationResult } = require("express-validator");
-const { request } = require("express");
 exports.bookRide= (request, response) => {
-    
+    BookRide.create({
+        bookerId: request.body.bookerId,
+        publisherId: request.body.publisherId,
+        seatWant: request.body.seat,
+    })
+    .then(result => {
+        return response.status(200).json(result);
+    })
+    .catch(err => {
+        return res.status(500).json(err);
+    });
 };
 exports.isCancelled=(request,response)=>{
     console.log(request.params)
