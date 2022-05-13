@@ -14,6 +14,8 @@ router.get("/booked-rides",adminController.bookRides);
 
 router.get("/user-list",adminController.userList);
 
+// router.get("/publisher-cancelled-rides",adminController.publisherCancelledRides);
+
 module.exports =router;
 
 
