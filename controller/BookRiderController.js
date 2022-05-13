@@ -34,3 +34,16 @@ exports.isCancelled=(request,response)=>{
 exports.isAccepted=(request,response)=>{
     
 }
+
+exports.getBookRides= (request, response) => {
+    console.log(request.params.bookerId)
+    BookRide.find({bookerId:request.params.bookerId,isAccepted:true})
+    .populate("publisherId").populate("bookerId")
+    .then(result=>{
+        console.log(result);
+        return response.status(200).json(result);
+    })
+    .catch(err=>{
+        return response.status(500).json(err);
+    });
+};
