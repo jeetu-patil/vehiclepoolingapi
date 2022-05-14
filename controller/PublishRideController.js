@@ -116,9 +116,10 @@ exports.publishRide= (request, response) => {
 
 //here booker request to the publisher
 exports.requestForPublisher= async (request, response) => {
+    console.log(request.body)
     let result=await PublishRide.findOne({_id: request.body.rideId});
     result.publisherRequest.push(request.body.bookerId);
-    result.save()
+    await result.save()
     .then(result => {
         return response.status(200).json(result);
     })
@@ -200,39 +201,42 @@ exports.showRequestToThePublisher=(request, response)=> {
 
 //if publisher decline request of booker
 exports.declineRequestOfBooker= (request, response) => {
+    console.log(request.params.publisherId,request.params.bookerId)
     User.findOne({_id:request.params.bookerId})
-    .then(result=> {
+    .then(async result=> {
+        console.log(result.mobile);
         let otp = otpGenerator.generate({ lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
         var option = {
             authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
             message:"Your Request For The Ride Is Declined Please Find Other Ride"
             , numbers: [result.mobile]
         }
-        fast2sms.sendMessage(option);
+        await fast2sms.sendMessage(option);
 
-        PublishRide.findOne({publisherId:request.params.publisherId})
+        PublishRide.findOne({publisherId:request.params.publisherId,_id:request.params.rideId})
         .then(answer => {
-            answer.request.pull(request.params.bookerId);
+            console.log(answer.publisherRequest)
+            answer.publisherRequest.pull(request.params.bookerId);
             answer.save()
             .then(async result => {
-                BookRide.updateOne({bookerId:result.params.bookerId},
-                    {
-                        publisherId:null
-                    }    
-                )
+                await BookRide.deleteOne({bookerId:request.params.bookerId,publisherId:request.params.publisherId})
                 .then(result => {
+                    console.log(result);
                     return response.status(200).json(result);
                 })
                 .catch(err => {
+                    console.log(error);
                     return response.status(500).json(err);
                 });   
             })
             .catch(err=>{
+                console.log(err);
                 return response.status(500).json(err);
             });
         })
         .catch(error => {
-            return response.status(500).json(err);
+            console.log(error);
+            return response.status(500).json(error);
         });
     })
     .catch(err=> {

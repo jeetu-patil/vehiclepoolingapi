@@ -32,7 +32,7 @@ router.get("/publisherforuser",publishController.allPublishRidesForUser);
 router.get("/showrequesttopublisher/:publisherId/:rideId",publishController.showRequestToThePublisher);
 
 //if publisher decline request of booker
-router.get("/declinerequestofbooker/:bookerId/:publisherId",publishController.declineRequestOfBooker);
+router.get("/declinerequestofbooker/:bookerId/:publisherId/:rideId",publishController.declineRequestOfBooker);
 
 //if publisher accept booker request 
 router.get("/acceptrequestofbooker/:bookerId/:publisherId/:rideId",publishController.acceptRequestOfBooker);

@@ -65,7 +65,7 @@ const publishRideSchema = new mongoose.Schema({
     isRideStarted:{
         type:Boolean
     },
-    isTimeExpired:{type:Boolean},
+    isTimeExpired:{type:Boolean,default:false},
     publisherRequest:[
          { 
             type:Schema.Types.ObjectId,
