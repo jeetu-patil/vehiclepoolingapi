@@ -80,23 +80,28 @@ exports.verifyEmail = (request, response) => {
         });
 };
 
-exports.verifyMobile = (request,response)=>{
+exports.verifyMobile =async (request,response)=>{
+    console.log(request.params.mobile)
+    console.log(request.params.userId)
     let otp = otpGenerator.generate(4, { lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
     var option = {
         authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
         message: otp + " is your OTP to verify your phone number."
         , numbers: [request.params.mobile]
     }
-    fast2sms.sendMessage(option);
+    await fast2sms.sendMessage(option);
     User.updateOne({_id:request.params.userId},
         {
             mobile:request.params.mobile
         }    
     )
     .then(result => {
+        console.log(result)
+        console.log(otp)
         return response.status(200).json({otp : otp});
     })
     .catch((err) => {
+        console.log(err);
         return response.status(500).json(err);
     });
 }
@@ -194,26 +199,24 @@ exports.confirmMobileVerification= (request, response) => {
 };
 
 exports.singleUser = (request, response) => {
-    User.findOne({_id: request.params.id}).populate("commentAndRating")
+    User.findOne({_id: request.params.id}).populate("comments.userId")
     .then((user) => {
         return response.status(200).json(user);
     })
     .catch((err) => {
+        console.log(err);
         return response.status(500).json(err);
     });
 };
 
-exports.addComment= (request, response) => {
+exports.addComment=async (request, response) => {
     let comment={
         userId: request.body.userId,
-        rating: request.body.rating,
         feedback: request.body.feedback,
     };
-    User.updateOne({_id: request.body.uId},
-        {
-            commentAndRating:comment
-        }    
-    )
+    let user=await User.findOne({_id: request.body.uId});  
+    user.comments.push(comment);
+    user.save()
     .then(result => {
         return response.status(200).json(result);
     })
