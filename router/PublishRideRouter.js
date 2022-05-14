@@ -35,7 +35,7 @@ router.get("/showrequesttopublisher/:publisherId/:rideId",publishController.show
 router.get("/declinerequestofbooker/:bookerId/:publisherId",publishController.declineRequestOfBooker);
 
 //if publisher accept booker request 
-router.get("/acceptrequestofbooker/:bookerId/:publisherId",publishController.acceptRequestOfBooker);
+router.get("/acceptrequestofbooker/:bookerId/:publisherId/:rideId",publishController.acceptRequestOfBooker);
 
 //if publisher cancelled ride
 router.get("/cancellride",publishController.cancelRide);

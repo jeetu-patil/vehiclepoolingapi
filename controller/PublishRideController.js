@@ -1,6 +1,5 @@
 const PublishRide=require("../model/PublishRide");
 const BookerHistory=require("../model/BookerHistory");
-const PublisherHistory=require("../model/PublisherHistory");
 const { validationResult } = require("express-validator");
 const User=require("../model/User");
 const cloudinary=require("cloudinary");
@@ -8,6 +7,7 @@ const BookRide=require("../model/BookRide");
 const otpGenerator = require('otp-generator');
 const fast2sms = require("fast-two-sms");
 const Place = require("../model/Place");
+const PublisRideHistory=require("../model/PublishRidesHistory");
 
 
 cloudinary.config({ 
@@ -116,9 +116,7 @@ exports.publishRide= (request, response) => {
 
 //here booker request to the publisher
 exports.requestForPublisher= async (request, response) => {
-    console.log(request.body)
-    let result=await PublishRide.findOne({publisherId: request.body.publisherId});
-    console.log(result);
+    let result=await PublishRide.findOne({_id: request.body.rideId});
     result.publisherRequest.push(request.body.bookerId);
     result.save()
     .then(result => {
@@ -131,8 +129,8 @@ exports.requestForPublisher= async (request, response) => {
 
 
 //here we display all available publisher
-exports.allPublishRidesForUser= (request, response) => {
-    PublishRide.find({isBooked:false,rideDate:{$gt:Date.now()}})
+exports.allPublishRidesForUser= async (request, response) => {
+    await PublishRide.find({isBooked:false,rideDate:{$gt:Date.now()}})
     .populate("publisherId").populate("fromId").populate("toId")
     .then((result) => {
         return response.status(200).json(result);
@@ -141,12 +139,39 @@ exports.allPublishRidesForUser= (request, response) => {
         console.log(err);
         return response.status(500).json(err);
     });
+
+    let publish=await PublishRide.find();
+
+    for(var i=0;i<publish.length;i++)
+    {
+        if(publish.rideDate>Date.now())
+        {
+            await PublishRide.updateOne({publisherId:request.params.publisherId},
+                {
+                    $set:{
+                        isTimeExpired:true,
+                        publisherRequest:[]
+                    }
+                }    
+            )
+            .then(async result=>{
+                await PublisRideHistory.create({
+                    publisherId:request.params.publisherId,
+                    publishRideId:publish._id,
+                    booker:publish.historyOfUser 
+                });
+            })
+            .catch(err=>{
+                return response.status(500).json(err);
+            });
+        }
+    }
 };
 
 
 //here get all publish rides of particular user
-exports.getPublishRidesOfSingle= (request, response) => {
-    PublishRide.find({publisherId: request.params.publisherId})
+exports.getPublishRidesOfSingle= async (request, response) => {
+    await PublishRide.find({publisherId: request.params.publisherId,isBooked:false,rideDate:{$gt:Date.now()}})
     .populate("publisherRequest").populate("fromId").populate("toId")
     .then((result) =>{
         return response.status(200).json(result);
@@ -154,11 +179,14 @@ exports.getPublishRidesOfSingle= (request, response) => {
     .catch((err) => {
         return response.status(500).json(err);
     });
+    
 };
 
 
 //showing request to the publisher
 exports.showRequestToThePublisher=(request, response)=> {
+    console.log(request.params.rideId);
+    console.log(request.params.publisherId);
     PublishRide.findOne({publisherId: request.params.publisherId,_id:request.params.rideId})
     .populate("publisherRequest").populate("fromId").populate("toId")
     .then(result=> {
@@ -214,12 +242,13 @@ exports.declineRequestOfBooker= (request, response) => {
 
 //if publisher accept booker request 
 exports.acceptRequestOfBooker=async (request, response) => {
-  let publishRider=await PublishRide.findOne({ publisherId: request.params.publisherId}).populate("publisherId");
+  let publishRider=await PublishRide.findOne({ publisherId: request.params.publisherId,_id:request.params.rideId}).populate("publisherId");
   let booker=await BookRide.findOne({bookerId: request.params.bookerId}).populate("bookerId");
-
+  console.log("SEat Want  : "+booker.seatWant);
+  console.log("Available : "+publishRider.seatAvailable);
   if(publishRider.seatAvailable>0)
   {
-    PublishRide.updateOne({publisherId: request.params.publisherId},
+    PublishRide.updateOne({publisherId: request.params.publisherId,_id:request.params.rideId},
         {
             seatAvailable: publishRider.seatAvailable-booker.seatWant,
         }
@@ -264,19 +293,33 @@ exports.acceptRequestOfBooker=async (request, response) => {
 
         if(publishRider.seatAvailable>0)
         {
-            let result=await PublishRide.findOne({publisherId:request.params.publisherId});
-            result.publisherRequest.pull(request.params.bookerId);
-            result.save()
-            .then(result=>{
-                return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name});
-            })
-            .catch(err=>{
-                return response.status(500).json(err);
-            });
+            let result=await PublishRide.findOne({publisherId:request.params.publisherId,_id:request.params.rideId});
+            result.historyOfUser.push(request.params.bookerId);
+            result.save();
 
+            result=await PublishRide.findOne({publisherId:request.params.publisherId,_id:request.params.rideId});
+            result.publisherRequest.pull(request.params.bookerId);
+            result.save();
+
+            publishRider=await PublishRide.findOne({ publisherId: request.params.publisherId,_id:request.params.rideId}).populate("publisherId");
             if(publishRider.seatAvailable<=0)
             {
-                PublishRide.updateOne({publisherId:request.params.publisherId},
+                // PublishRide.updateOne({publisherId:request.params.publisherId},
+                //     {
+                //         $set:{
+                //             isBooked:true,
+                //             publisherRequest:[]
+                //         }
+                //     }    
+                // )
+                // .then(result=>{
+                //     return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name});
+                // })
+                // .catch(err=>{
+                //     return response.status(500).json(err);
+                // });
+
+                await PublishRide.updateOne({publisherId:request.params.publisherId},
                     {
                         $set:{
                             isBooked:true,
@@ -284,15 +327,19 @@ exports.acceptRequestOfBooker=async (request, response) => {
                         }
                     }    
                 )
-                .then(result=>{
-                    return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name});
+                .then(async result=>{
+                    await PublisRideHistory.create({
+                        publisherId:request.params.publisherId,
+                        publishRideId:publishRider._id,
+                        booker:publishRider.historyOfUser 
+                    });
                 })
                 .catch(err=>{
                     return response.status(500).json(err);
                 });
             }
-        }
-        
+        }   
+        return response.status(200).json({msg:"Your ride is confirmed with "+booker.bookerId.name}); 
     })
     .catch(err =>{
         console.log(err);
@@ -328,53 +375,48 @@ exports.matchOtp= async (request, response) => {
         if(t==publisher.otp[i].otpNumber)
         {
             status=true;
-            console.log("1")
             bookerId=publisher.otp[i].bookerId;
-            id=publisher.otp[i]._id
-            console.log("2")
+            id=publisher.otp[i]._id;
             break;
         }
     }
 
-    console.log(bookerId);
-    console.log(id)
-    console.log("3")
     if(status){
-        console.log("4")
         publisher.otp.pull(id);
         publisher.save()
         .then(async result=>{
-            console.log("5")
             await BookerHistory.findOne({bookerId:bookerId})
             .then(bh =>{
                 if(!bh){
-                    console.log("6")
                     bh=new BookerHistory();
                     bh.bookerId=bookerId;
-                    console.log("7")
                 }
                 bh.publisherId.push(request.body.publisherId);
-                bh.save().then().catch(err=>{
+                bh.save()
+                .then(async result=>{
+                    console.log("enter 2")
+                    console.log(request.params.publierId);
+                    console.log(bookerId);
+                    await BookRide.deleteOne({_id:request.body.id});
+                }).catch(err=>{
                     console.log(err);
                 });
             }).catch((err)=>{
 
             });
 
-            console.log("8")
-            await PublisherHistory.findOne({publisherId:request.body.publisherId,_id:request.body.rideId})
-            .then(ph =>{
-                if(!ph){
-                    ph=new PublisherHistory();
-                    ph.publisherId=request.body.publisherId;  
-                }
-                ph.bookerId.push(bookerId);
-                ph.save().then(result=>{
-                    console.log("9")
-                }).catch(err=>{
-                    console.log(err);
-                });
-            });
+            // await PublisherHistory.findOne({publisherId:request.body.publisherId,_id:request.body.rideId})
+            // .then(ph =>{
+            //     if(!ph){
+            //         ph=new PublisherHistory();
+            //         ph.publisherId=request.body.publisherId;  
+            //     }
+            //     ph.bookerId.push(bookerId);
+            //     ph.save().then(result=>{
+            //     }).catch(err=>{
+            //         console.log(err);
+            //     });
+            // });
 
             return response.status(200).json({msg:"Success"});
         })
