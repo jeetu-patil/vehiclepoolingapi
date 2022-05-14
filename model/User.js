@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema({
         required : true
     },
     mobile : {
-        type : Number
+        type : Number,
+        default:0
     },
     age : {
         type : Number,
@@ -78,14 +79,13 @@ const userSchema = new mongoose.Schema({
         type:Date,
         default:Date.now
     },
-    commentAndRating:[
+    comments:[
         {
             userId:
             {
                 type:Schema.Types.ObjectId,
                 ref:"user"
             },
-            rating:{type:Number},
             feedback:{type:String}
         }
     ]
