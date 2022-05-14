@@ -16,3 +16,15 @@ exports.viewPublisherHistory= (request, response) => {
         return response.status(500).json(err);
     });
 };
+
+
+exports.publishHistory= (request, response) => {
+    PublishRide.find({publisherId: request.params.publisherId,isBooked:true})
+    .populate("publisherRequest").populate("fromId").populate("toId")
+    .then((result) =>{
+        return response.status(200).json(result);
+    })
+    .catch((err) => {
+        return response.status(500).json(err);
+    });
+};
