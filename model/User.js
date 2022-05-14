@@ -6,9 +6,7 @@ const userSchema = new mongoose.Schema({
         required : true
     },
     email : {
-        type : String,
-        required : true,
-        unique : true
+        type : String
     },
     password : {
         type : String,
@@ -85,7 +83,6 @@ const userSchema = new mongoose.Schema({
                 type:Schema.Types.ObjectId,
                 ref:"user"
             },
-            rating:{type:Number},
             feedback:{type:String}
         }
     ]
