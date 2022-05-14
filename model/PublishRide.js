@@ -53,9 +53,19 @@ const publishRideSchema = new mongoose.Schema({
             otpNumber:{type:Number}
         }
     ],
+    historyOfUser:[
+        {
+            bookerId:
+            {
+                type:Schema.Types.ObjectId,
+                ref:"user"
+            }
+        }
+    ],
     isRideStarted:{
         type:Boolean
     },
+    isTimeExpired:{type:Boolean},
     publisherRequest:[
          { 
             type:Schema.Types.ObjectId,
