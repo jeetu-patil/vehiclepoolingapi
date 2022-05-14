@@ -349,7 +349,6 @@ exports.acceptRequestOfBooker=async (request, response) => {
 };
 
 
-
 //showing all accept user by publisher
 exports.showAllAcceptRequestByPublisher= (request, response) => {
     PublishRide.findOne({publisherId: request.params.publisherId})
