@@ -20,16 +20,17 @@ router.post("/signup",
     body("age").isNumeric(),
     body("aadhar").isLength(12),
     userController.signUp);
+    router.post("/edit-profile",upload.single("image"),userController.editProfileNMI)
 router.get("/verify-email/:id",userController.verifyEmail);
 
 router.post("/signin",
     body("email").isEmail().notEmpty(),
     userController.signIn);
 
-router.post("/edit-profile",
-body("name").notEmpty(),
-body("age").notEmpty().isNumeric(),
-userController.editProfile);
+// router.post("/edit-profile",
+// body("name").notEmpty(),
+// body("age").notEmpty().isNumeric(),
+// userController.editProfile);
 
 router.get("/verify-mobile/:mobile/:userId",
 userController.verifyMobile);
