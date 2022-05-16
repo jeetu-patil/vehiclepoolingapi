@@ -15,7 +15,7 @@ const publishRideSchema = new mongoose.Schema({
         ref:"place"
     },
     rideDate:{
-     type:Date,
+     type:String,
     },
     seatAvailable: {
         type:Number,
@@ -28,7 +28,7 @@ const publishRideSchema = new mongoose.Schema({
     },
     totalAmount:{
         type:Number,
-        trim:true
+        default:0
     },
     amountPerPerson: {
         type:Number,
@@ -52,7 +52,8 @@ const publishRideSchema = new mongoose.Schema({
                 type:Schema.Types.ObjectId,
                 ref:"user"
             },
-            otpNumber:{type:Number}
+            otpNumber:{type:Number},
+            bookRideId:{type:Schema.Types.ObjectId}
         }
     ],
     historyOfUser:[
@@ -78,6 +79,6 @@ const publishRideSchema = new mongoose.Schema({
         }
     ],
     msgForBooker:{type:String}
-},{timeStamps:true})
+},{ versionKey: false })
 
 module.exports = mongoose.model("publishride",publishRideSchema);
