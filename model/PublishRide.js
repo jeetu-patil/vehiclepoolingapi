@@ -35,10 +35,12 @@ const publishRideSchema = new mongoose.Schema({
         trim:true
     },
     isBooked:{
-        type:Boolean
+        type:Boolean,
+        default:false
     },
     isCancelled:{
-        type:Boolean
+        type:Boolean,
+        default : false
     },
     ridePublishDate:{
         type:Date
@@ -67,10 +69,13 @@ const publishRideSchema = new mongoose.Schema({
     },
     isTimeExpired:{type:Boolean,default:false},
     publisherRequest:[
-         { 
-            type:Schema.Types.ObjectId,
-            ref:"user"
-       } 
+        {
+            userId:{ 
+                type:Schema.Types.ObjectId,
+                ref:"user"
+            },
+            bookRideId:{type:Schema.Types.ObjectId}
+        }
     ],
     msgForBooker:{type:String}
 },{timeStamps:true})
