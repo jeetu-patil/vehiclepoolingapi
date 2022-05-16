@@ -2,12 +2,20 @@ const User = require("../model/User");
 const { validationResult } = require("express-validator");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const cloudinary=require("cloudinary");
 const config = require('config');
 const otpGenerator = require('otp-generator');
 const fast2sms = require("fast-two-sms");
 let jwt = require("jsonwebtoken");
 var key = "password";
 var algo = "aes256";
+
+cloudinary.config({ 
+    cloud_name: 'dfhuhxrw3', 
+    api_key: '212453663814245', 
+    api_secret: 'zzSd8ptSYG-MS7hRnE-Ab46Bmts' 
+  });
+
 
 exports.signUp = (request, response) => {
     const errors = validationResult(request);
@@ -224,3 +232,38 @@ exports.addComment=async (request, response) => {
         return response.status(500).json(err);
     });
 };
+exports.editProfileNMI = async (request, response) => {
+    console.log(request.body.name);
+    console.log(request.file);
+    const errors = validationResult(request);
+    if (!errors.isEmpty())  
+      return response.status(400).json({ errors: errors.array() });
+      let image="";
+    if(request.file)
+    { 
+        var result=await cloudinary.v2.uploader.upload(request.file.path);
+        image=result.url;
+        console.log(image);
+    }
+    User.updateOne(
+      { _id: request.body.userId },
+      {
+        $set: {
+          name: request.body.name,
+          miniBio : request.body.miniBio,
+          image : image
+        }
+      })
+      .then((result) => {
+        if (result) {
+            console.log(result);
+            return response.status(200).json(result);
+        }
+        
+        })
+          
+            .catch((err) => {
+              return response.status(500).json(err);
+            });
+        }
+    
