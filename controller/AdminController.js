@@ -39,7 +39,7 @@ exports.allPublishRidesForUser= (request, response) => {
 
 exports.bookRides= (request,response)=>{
     BookRide.find()
-    .populate("publisherId").populate("bookerId")
+    .populate("rideId").populate("bookerId")
     .then((result) => {
         return response.status(200).json(result);
     })
