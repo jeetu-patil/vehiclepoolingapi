@@ -41,9 +41,6 @@ router.get("/acceptrequestofbooker/:bookerId/:publisherId/:rideId/:bookRideId",p
 router.get("/cancellride/:publisherId/:rideId",publishController.cancelRide);
 
 
-//if booker cancelled ride
-router.get("/bookercancelride/:publisherId/:rideId/:bookerId",publishController.bookerCancelRide);
-
 
 //Particular ride request
 router.get("/particualride/:id",publishController.getParticualRideRequest);
@@ -65,6 +62,10 @@ router.post("/matchotp",publishController.matchOtp);
 
 //here get all publish rides of particular user
 router.get("/getPublishRidesOfSingle/:publisherId",publishController.getPublishRidesOfSingle);
+
+
+//if booker cancel ride
+router.get("/cancelridebybooker/:bookerId/:rideId/:publisherId",publishController.cancelRideByBooker);
 
 
 module.exports =router;

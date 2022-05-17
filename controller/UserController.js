@@ -89,8 +89,6 @@ exports.verifyEmail = (request, response) => {
 };
 
 exports.verifyMobile =async (request,response)=>{
-    console.log(request.params.mobile)
-    console.log(request.params.userId)
     let otp = otpGenerator.generate(4, { lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
     var option = {
         authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
@@ -103,10 +101,10 @@ exports.verifyMobile =async (request,response)=>{
             mobile:request.params.mobile
         }    
     )
-    .then(result => {
-        console.log(result)
+    .then(async result => {
+        let a=await User.findOne({_id:request.params.userId});
         console.log(otp)
-        return response.status(200).json({otp : otp});
+        return response.status(200).json({otp : otp,user:a});
     })
     .catch((err) => {
         console.log(err);

@@ -587,4 +587,6 @@ exports.getRidesForBooker = (request, response) => {
     });
 };
 
-exports.bookerCancelRide = (request, response) => {};
+exports.cancelRideByBooker = (request, response) => {
+  
+};
