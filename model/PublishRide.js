@@ -58,11 +58,8 @@ const publishRideSchema = new mongoose.Schema({
     ],
     historyOfUser:[
         {
-            bookerId:
-            {
-                type:Schema.Types.ObjectId,
-                ref:"user"
-            }
+            type:Schema.Types.ObjectId,
+            ref:"user"
         }
     ],
     isRideStarted:{

@@ -4,7 +4,7 @@ const { validationResult } = require("express-validator");
 exports.bookRide= (request, response) => {
     BookRide.create({
         bookerId: request.body.bookerId,
-        publisherId: request.body.publisherId,
+        rideId: request.body.rideId,
         seatWant: request.body.seat,
     })
     .then(result => {
@@ -36,13 +36,14 @@ exports.isAccepted=(request,response)=>{
     
 }
 
-exports.getBookRides=(request, response) => {
+exports. getBookRides=(request, response) => {
     temp=[];
-    BookRide.find({bookerId:request.params.bookerId,isAccepted:true})
+    BookRide.find({bookerId:request.params.bookerId,isAccepted:true}).sort({date:"desc"})
     .populate("bookerId")
     .then(async result=>{
         for(var i=0; i<result.length; i++){
-            let ans=await PublishRide.findOne({ publisherId: result[i].publisherId}).populate("fromId").populate("toId").populate("publisherId");
+            console.log("ID : "+result[i].rideId);
+            let ans=await PublishRide.findOne({ _id: result[i].rideId}).populate("fromId").populate("toId").populate("publisherId");
             temp[i]=ans;
         }
         return response.status(200).json(temp);

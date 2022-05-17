@@ -6,7 +6,7 @@ const bookRideSchema=mongoose.Schema({
         type:Schema.Types.ObjectId,
         ref:"user"
     },
-    publisherId:{
+    rideId:{
         type:Schema.Types.ObjectId,
         ref:"publishride"
     },
