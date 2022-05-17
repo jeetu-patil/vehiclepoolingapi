@@ -135,6 +135,7 @@ exports.requestForPublisher = async (request, response) => {
 //here we display all available publisher
 exports.allPublishRidesForUser = async (request, response) => {
   await PublishRide.find({
+    isTimeExpired:false,
     isBooked: false,
     rideDate: { $gt: Date.now() },
     isCancelled: false,
@@ -334,7 +335,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
             console.log(err);
           });
 
-        await publishRider
+        await PublishRide
           .updateOne(
             { _id: request.params.rideId },
             {
@@ -407,7 +408,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
 
 //showing all accept user by publisher
 exports.showAllAcceptRequestByPublisher = (request, response) => {
-  PublishRide.findOne({ publisherId: request.params.publisherId })
+  PublishRide.findOne({_id:request.params.rideId})
     .populate("otp.bookerId")
     .then((result) => {
       console.log(result);
@@ -421,22 +422,25 @@ exports.showAllAcceptRequestByPublisher = (request, response) => {
 //match otp which provide by user to the publisher
 exports.matchOtp = async (request, response) => {
   var status = false;
-  var publisher = await PublishRide.findOne({
-    publisherId: request.body.publisherId,
-  });
+  var publisher = await PublishRide.findOne({_id:request.body.rideId});
   var bookerId;
+  var bookRideId;
   var id;
   for (var i = 0; i < publisher.otp.length; i++) {
     t = parseInt(request.body.otp);
     if (t == publisher.otp[i].otpNumber) {
       status = true;
       bookerId = publisher.otp[i].bookerId;
+      bookRideId=publisher.otp[i].bookRideId;
       id = publisher.otp[i]._id;
       break;
     }
   }
 
   if (status) {
+
+    await BookRide.deleteOne({_id:bookRideId});
+
     publisher.otp.pull(id);
     publisher
       .save()

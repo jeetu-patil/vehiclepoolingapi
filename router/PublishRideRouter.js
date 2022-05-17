@@ -55,7 +55,7 @@ router.post("/ridesforbooker",publishController.getRidesForBooker);
 
 
 //showing all accept user by publisher
-router.get("/showallacceptrequestbypublisher/:publisherId",publishController.showAllAcceptRequestByPublisher);
+router.get("/showallacceptrequestbypublisher/:publisherId/:rideId",publishController.showAllAcceptRequestByPublisher);
 
 
 
