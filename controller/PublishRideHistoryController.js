@@ -4,7 +4,7 @@ const PublishRide= require("../model/PublishRide");
 exports.viewPublisherHistory= (request, response) => {
     temp=[];
     k=0;
-    PublishRide.find({publisherId:request.params.publisherId})
+    PublishRide.find({_id:request.params.rideId})
     .populate("historyOfUser")
     .then(async result=>{
         for(var i=0; i<result.length; i++)
@@ -27,7 +27,9 @@ exports.publishHistory= async (request, response) => {
     let result1=await PublishRide.find({publisherId: request.params.publisherId,isTimeExpired:true}).sort({date: 'desc'})
     .populate("publisherRequest").populate("fromId").populate("toId");
 
-    console.log(result1);
+    console.log(result1)
+    console.log(result)
+
     for(i=0; i<result.length; i++){
         temp[i]=result[i];
     }
