@@ -19,10 +19,14 @@ cloudinary.config({
 
 //check it is first ride or not
 exports.checkUserRidePublish = (request, response) => {
+
+  if(request.body.id)
+    return response.status(500).json({msg:"error"});
+
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
-  User.findOne({ _id: request.params.id })
+  User.findOne({ _id: request.body.id })
     .then((result) => {
       if (result.publishRideCount > 0)
         return response.status(200).json({ result: result, count: 1 });
@@ -175,7 +179,7 @@ exports.allPublishRidesForUser = async (request, response) => {
 //here get all publish rides of particular user
 exports.getPublishRidesOfSingle = async (request, response) => {
   await PublishRide.find({
-    publisherId: request.params.publisherId,
+    publisherId: request.body.publisherId,
     isBooked: false,
     rideDate: { $gt: Date.now() },
     isCancelled: false,
@@ -194,8 +198,8 @@ exports.getPublishRidesOfSingle = async (request, response) => {
 //showing request to the publisher
 exports.showRequestToThePublisher = (request, response) => {
   PublishRide.findOne({
-    publisherId: request.params.publisherId,
-    _id: request.params.rideId,
+    publisherId: request.body.publisherId,
+    _id: request.body.rideId,
   })
     .populate("publisherRequest.userId")
     .populate("fromId")
@@ -548,7 +552,7 @@ exports.cancelRide = async (request, response) => {
 
 //Here we fetch particular ride
 exports.getParticualRideRequest = (request, response) => {
-  PublishRide.findOne({ _id: request.params.id })
+  PublishRide.findOne({ _id: request.body.id })
     .populate("publisherId")
     .populate("fromId")
     .populate("toId")

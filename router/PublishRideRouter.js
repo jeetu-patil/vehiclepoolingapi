@@ -14,7 +14,7 @@ const storage=multer.diskStorage({
 const upload=multer({storage:storage});
 
 //check it is first ride or not
-router.get("/checkuserride/:id",publishController.checkUserRidePublish);
+router.post("/checkuserride",publishController.checkUserRidePublish);
 
 //if it is first ride then he/she fill some detail one time
 router.post("/firstpublishride",upload.single("image"),publishController.firstPublishRide);
@@ -29,7 +29,7 @@ router.post("/requestforpublisher",publishController.requestForPublisher);
 router.get("/publisherforuser",publishController.allPublishRidesForUser);
 
 //showing request to the publisher
-router.get("/showrequesttopublisher/:publisherId/:rideId",publishController.showRequestToThePublisher);
+router.post("/showrequesttopublisher",publishController.showRequestToThePublisher);
 
 //if publisher decline request of booker
 router.get("/declinerequestofbooker/:bookerId/:publisherId/:rideId",publishController.declineRequestOfBooker);
@@ -43,7 +43,7 @@ router.get("/cancellride/:publisherId/:rideId",publishController.cancelRide);
 
 
 //Particular ride request
-router.get("/particualride/:id",publishController.getParticualRideRequest);
+router.post("/particualride",publishController.getParticualRideRequest);
 
 
 //all rides for booker according to date
@@ -61,7 +61,7 @@ router.post("/matchotp",publishController.matchOtp);
 
 
 //here get all publish rides of particular user
-router.get("/getPublishRidesOfSingle/:publisherId",publishController.getPublishRidesOfSingle);
+router.post("/getPublishRidesOfSingle",publishController.getPublishRidesOfSingle);
 
 
 //if booker cancel ride
