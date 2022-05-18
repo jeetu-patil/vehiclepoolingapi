@@ -5,7 +5,6 @@ const publishRideSchema = new mongoose.Schema({
         type: Schema.Types.ObjectId,
         ref: "user"
     },
-
     fromId:{ 
          type:Schema.Types.ObjectId,
          ref:"place"

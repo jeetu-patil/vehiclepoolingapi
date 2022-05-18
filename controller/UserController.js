@@ -6,9 +6,16 @@ const cloudinary=require("cloudinary");
 const config = require('config');
 const otpGenerator = require('otp-generator');
 const fast2sms = require("fast-two-sms");
+const Vonage = require('@vonage/server-sdk');
 let jwt = require("jsonwebtoken");
 var key = "password";
 var algo = "aes256";
+
+const vonage = new Vonage({
+  apiKey: "484720a0",
+  apiSecret: "Sl8CTRxULvNNSRjN"
+})
+
 
 cloudinary.config({ 
     cloud_name: 'dfhuhxrw3', 
@@ -94,12 +101,26 @@ exports.verifyEmail = (request, response) => {
 
 exports.verifyMobile =async (request,response)=>{
     let otp = otpGenerator.generate(4, { lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
-    var option = {
-        authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
-        message: otp + " is your OTP to verify your phone number."
-        , numbers: [request.params.mobile]
-    }
-    await fast2sms.sendMessage(option);
+    // var option = {
+    //     authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
+    //     message: otp + " is your OTP to verify your phone number."
+    //     , numbers: [request.params.mobile]
+    // }
+    const from = "RideSharely"
+    const to = "91"+request.params.mobile
+    const text = 'Your OTP is '+otp+" . PLease use this OTP to verify your mobile . Thankyou"
+   await vonage.message.sendSms(from, to, text, (err, responseData) => {
+        if (err) {
+            console.log(err);
+        } else {
+            if(responseData.messages[0]['status'] === "0") {
+                console.log("Message sent successfully.");
+            } else {
+                console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
+            }
+        }
+    })
+    // await fast2sms.sendMessage(option);
     User.updateOne({_id:request.params.userId},
         {
             mobile:request.params.mobile
