@@ -11,7 +11,7 @@ exports.tokenauthotication = (req, res, next) => {
 
          token = req.headers.authorization;
 
-         payload = jwt.verify(token,"ramaramaramasiyaramasiyaramaramaramaramaramramramramram");
+         payload = jwt.verify(token,"aabbccdd");
         console.log("in payLoad "+payload);
         next();
     }
