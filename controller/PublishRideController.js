@@ -5,7 +5,6 @@ const User = require("../model/User");
 const cloudinary = require("cloudinary");
 const BookRide = require("../model/BookRide");
 const otpGenerator = require("otp-generator");
-const PublisRideHistory = require("../model/PublishRidesHistory");
 const fast2sms = require("fast-two-sms");
 
 cloudinary.config({
@@ -134,48 +133,39 @@ exports.requestForPublisher = async (request, response) => {
 
 //here we display all available publisher
 exports.allPublishRidesForUser = async (request, response) => {
-  await PublishRide.find({
-    isTimeExpired:false,
+  let publish = await PublishRide.find({
+    isTimeExpired: false,
     isBooked: false,
     rideDate: { $gt: Date.now() },
     isCancelled: false,
   })
+    .sort({ date: "desc" })
     .populate("publisherId")
     .populate("fromId")
-    .populate("toId")
-    .then((result) => {
-      return response.status(200).json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      return response.status(500).json(err);
-    });
+    .populate("toId");
 
-  let publish = await PublishRide.find();
+  let publish1=await PublishRide.find({
+    isTimeExpired: false,
+    isBooked: false,
+    isCancelled: false,
+  });
 
-  for (var i = 0; i < publish.length; i++) {
-    if (publish.rideDate > Date.now()) {
+  for (var i = 0; i < publish1.length; i++) {
+    console.log(typeof(publish1[i].rideDate)+"<"+typeof(Date.now().toString()))
+    if (publish1[i].rideDate < Date.now()) {
+      console.log("Successs"+publish1[i]._id);
       await PublishRide.updateOne(
-        { publisherId: request.params.publisherId },
-        {
-          $set: {
-            isTimeExpired: true,
-            publisherRequest: [],
-          },
-        }
-      )
-        .then(async (result) => {
-          await PublisRideHistory.create({
-            publisherId: request.params.publisherId,
-            publishRideId: publish._id,
-            booker: publish.historyOfUser,
-          });
-        })
-        .catch((err) => {
-          return response.status(500).json(err);
-        });
+        { _id: publish1[i]._id },
+          {
+            $set: {
+              isTimeExpired: true,
+              publisherRequest: [],
+            },
+          }
+      );
     }
   }
+  return response.status(200).json(publish);
 };
 
 //here get all publish rides of particular user
@@ -335,15 +325,14 @@ exports.acceptRequestOfBooker = async (request, response) => {
             console.log(err);
           });
 
-        await PublishRide
-          .updateOne(
-            { _id: request.params.rideId },
-            {
-              totalAmount:
-                booker.seatWant * publishRider.amountPerPerson +
-                publishRider.totalAmount,
-            }
-          )
+        await PublishRide.updateOne(
+          { _id: request.params.rideId },
+          {
+            totalAmount:
+              booker.seatWant * publishRider.amountPerPerson +
+              publishRider.totalAmount,
+          }
+        )
           .then()
           .catch((err) => {
             console.log(err);
@@ -372,7 +361,6 @@ exports.acceptRequestOfBooker = async (request, response) => {
             publisherId: request.params.publisherId,
             _id: request.params.rideId,
           });
-          console.log("Seat : " + publishRider.seatAvailable);
           if (publishRider.seatAvailable <= 0) {
             await PublishRide.updateOne(
               { _id: request.params.rideId },
@@ -382,17 +370,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
                   publisherRequest: [],
                 },
               }
-            )
-              .then(async (result) => {
-                await PublisRideHistory.create({
-                  publisherId: request.params.publisherId,
-                  publishRideId: publishRider._id,
-                  booker: publishRider.historyOfUser,
-                });
-              })
-              .catch((err) => {
-                return response.status(500).json(err);
-              });
+            );
           }
         }
         return response
@@ -408,7 +386,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
 
 //showing all accept user by publisher
 exports.showAllAcceptRequestByPublisher = (request, response) => {
-  PublishRide.findOne({_id:request.params.rideId})
+  PublishRide.findOne({ _id: request.params.rideId })
     .populate("otp.bookerId")
     .then((result) => {
       console.log(result);
@@ -422,7 +400,7 @@ exports.showAllAcceptRequestByPublisher = (request, response) => {
 //match otp which provide by user to the publisher
 exports.matchOtp = async (request, response) => {
   var status = false;
-  var publisher = await PublishRide.findOne({_id:request.body.rideId});
+  var publisher = await PublishRide.findOne({ _id: request.body.rideId });
   var bookerId;
   var bookRideId;
   var id;
@@ -431,15 +409,14 @@ exports.matchOtp = async (request, response) => {
     if (t == publisher.otp[i].otpNumber) {
       status = true;
       bookerId = publisher.otp[i].bookerId;
-      bookRideId=publisher.otp[i].bookRideId;
+      bookRideId = publisher.otp[i].bookRideId;
       id = publisher.otp[i]._id;
       break;
     }
   }
 
   if (status) {
-
-    await BookRide.deleteOne({_id:bookRideId});
+    await BookRide.deleteOne({ _id: bookRideId });
 
     publisher.otp.pull(id);
     publisher
@@ -587,6 +564,47 @@ exports.getRidesForBooker = (request, response) => {
     });
 };
 
-exports.cancelRideByBooker = (request, response) => {
-  
+exports.cancelRideByBooker = async (request, response) => {
+  let i;
+  let publisher = await PublishRide.findOne({
+    _id: request.params.rideId,
+  }).populate("publisherId");
+  let booker = await BookRide.findOne({ _id: request.params.bookRideId });
+  publisher.historyOfUser.pull(request.params.bookerId);
+  publisher.save();
+
+  for (i = 0; publisher.otp.length; i++) {
+    if (publisher.otp[i].bookerId == request.params.bookerId) break;
+  }
+
+  publisher = await PublishRide.findOne({
+    _id: request.params.rideId,
+  }).populate("publisherId");
+  publisher.otp.splice(i, 1);
+  publisher.save();
+
+  await BookRide.deleteOne({ _id: request.params.bookRideId });
+
+  PublishRide.updateOne(
+    { _id: request.params.rideId },
+    {
+      seatAvailable: booker.seatWant + publisher.seatAvailable,
+      isBooked: false,
+    }
+  )
+    .then(async (result) => {
+      var option = {
+        authorization:
+          "kAHrGWQ7EdUgB5sR6ehbCyLJuTnX82iPOc1pYZl9Sw0mzjvoK4fcXF9uO3AbhYdaBke2EVZWjLlPCyTz",
+        message:
+          "Your Request Cancelled By Booker, Your currently seatAvailable is " +
+          (booker.seatWant + publisher.seatAvailable),
+        numbers: [publisher.publisherId.mobile],
+      };
+      await fast2sms.sendMessage(option);
+      return response.status(200).json(result);
+    })
+    .catch((err) => {
+      return response.status(500).json(err);
+    });
 };

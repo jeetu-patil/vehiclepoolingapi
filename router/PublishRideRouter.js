@@ -65,7 +65,7 @@ router.get("/getPublishRidesOfSingle/:publisherId",publishController.getPublishR
 
 
 //if booker cancel ride
-router.get("/cancelridebybooker/:bookerId/:rideId/:publisherId",publishController.cancelRideByBooker);
+router.get("/cancelridebybooker/:bookerId/:rideId/:publisherId/:bookRideId",publishController.cancelRideByBooker);
 
 
 module.exports =router;

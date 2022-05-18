@@ -38,15 +38,16 @@ exports.isAccepted=(request,response)=>{
 
 exports. getBookRides=(request, response) => {
     temp=[];
+    r=[];
     BookRide.find({bookerId:request.params.bookerId,isAccepted:true}).sort({date:"desc"})
     .populate("bookerId")
     .then(async result=>{
         for(var i=0; i<result.length; i++){
-            console.log("ID : "+result[i].rideId);
             let ans=await PublishRide.findOne({ _id: result[i].rideId}).populate("fromId").populate("toId").populate("publisherId");
+            r[i]=result[i]._id;
             temp[i]=ans;
         }
-        return response.status(200).json(temp);
+        return response.status(200).json({temp:temp,result:r});
     })
     .catch(err=>{
         console.log(err);
