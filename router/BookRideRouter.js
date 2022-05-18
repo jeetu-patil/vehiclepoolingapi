@@ -6,8 +6,8 @@ const bookRiderController=require('../controller/BookRiderController');
 
 
 router.post("/book",jwtAuth.tokenauthotication,bookRiderController.bookRide);
-router.get("/iscancelled/:Id",jwtAuth.tokenauthotication,bookRiderController.isCancelled)
-router.get("/isaccepted/:Id",jwtAuth.tokenauthotication,bookRiderController.isAccepted);
+router.get("/iscancelled/:Id",bookRiderController.isCancelled)
+router.get("/isaccepted/:Id",bookRiderController.isAccepted);
 router.get("/getbookrides/:bookerId",bookRiderController.getBookRides);
 
 

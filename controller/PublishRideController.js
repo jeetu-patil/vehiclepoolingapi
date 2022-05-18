@@ -5,8 +5,12 @@ const User = require("../model/User");
 const cloudinary = require("cloudinary");
 const BookRide = require("../model/BookRide");
 const otpGenerator = require("otp-generator");
-const fast2sms = require("fast-two-sms");
-
+// const fast2sms = require("fast-two-sms");
+const Vonage = require("@vonage/server-sdk")
+const vonage = new Vonage({
+  apiKey: "484720a0",
+  apiSecret: "Sl8CTRxULvNNSRjN"
+})
 cloudinary.config({
   cloud_name: "dfhuhxrw3",
   api_key: "212453663814245",
@@ -210,13 +214,28 @@ exports.declineRequestOfBooker = (request, response) => {
   User.findOne({ _id: request.params.bookerId })
     .then(async (result) => {
       console.log(result.mobile);
-      var option = {
-        authorization:
-          "kAHrGWQ7EdUgB5sR6ehbCyLJuTnX82iPOc1pYZl9Sw0mzjvoK4fcXF9uO3AbhYdaBke2EVZWjLlPCyTz",
-        message: "Your Request For The Ride Is Declined Please Find Other Ride",
-        numbers: [result.mobile],
-      };
-      await fast2sms.sendMessage(option);
+      // var option = {
+      //   authorization:
+      //     "kAHrGWQ7EdUgB5sR6ehbCyLJuTnX82iPOc1pYZl9Sw0mzjvoK4fcXF9uO3AbhYdaBke2EVZWjLlPCyTz",
+      //   message: "Your Request For The Ride Is Declined Please Find Other Ride",
+      //   numbers: [result.mobile],
+      // };
+      // await fast2sms.sendMessage(option);
+
+      const from = "RideSharely"
+      const to = "91"+result.mobile
+      const text = 'Your Request for the ride is declined by the publisher . Please find other ride . Sorry for the inconvenience'
+     await vonage.message.sendSms(from, to, text, (err, responseData) => {
+          if (err) {
+              console.log(err);
+          } else {
+              if(responseData.messages[0]['status'] === "0") {
+                  console.log("Message sent successfully.");
+              } else {
+                  console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
+              }
+          }
+      })
 
       PublishRide.findOne({ _id: request.params.rideId })
         .then((answer) => {
@@ -269,7 +288,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
     _id: request.params.bookRideId,
   }).populate("bookerId");
   console.log(
-    booker.seatWant,
+    booker.seatWant,booker.bookerId.mobile,
     publishRider.amountPerPerson,
     publishRider.totalAmount
   );
@@ -286,21 +305,23 @@ exports.acceptRequestOfBooker = async (request, response) => {
           upperCaseAlphabets: false,
           specialChars: false,
         });
-        var option = {
-          authorization:
-            "kAHrGWQ7EdUgB5sR6ehbCyLJuTnX82iPOc1pYZl9Sw0mzjvoK4fcXF9uO3AbhYdaBke2EVZWjLlPCyTz",
-          message:
-            " " +
-            otp +
-            " : " +
-            publishRider.name +
-            " , Mobile : " +
-            publishRider.mobile +
-            ",Vehcile Number :  " +
-            publishRider.publisherId.vehicle.number,
-          numbers: [booker.bookerId.mobile],
-        };
-        await fast2sms.sendMessage(option);
+        console.log("OTP : "+otp);
+        const from = "RideSharely"
+        const to = "91"+booker.bookerId.mobile
+        console.log(to);
+        const text = 'Your request for the ride is accepted . OTP for the ride is '+otp+' .  Publisher Name : '+ publishRider.publisherId.name + ', Contact: '+publishRider.publisherId.mobile+', Vehicle no.: '+publishRider.publisherId.vehicle.number
+
+       await vonage.message.sendSms(from, to, text, (err, responseData) => {
+            if (err) {
+                console.log(err);
+            } else {
+                if(responseData.messages[0]['status'] === "0") {
+                    console.log("Message sent successfully.");
+                } else {
+                    console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
+                }
+            }
+        });
 
         let tempOtp = {
           bookerId: request.params.bookerId,
@@ -503,14 +524,24 @@ exports.cancelRide = async (request, response) => {
         console.error(err);
       });
   }
-  var option = {
-    authorization:
-      "kAHrGWQ7EdUgB5sR6ehbCyLJuTnX82iPOc1pYZl9Sw0mzjvoK4fcXF9uO3AbhYdaBke2EVZWjLlPCyTz",
-    message:
-      "Your Request Cancelled By Publisher , PLease find onother ride .  Sorry for your inconvenience..",
-    numbers: [temp],
-  };
-  await fast2sms.sendMessage(option);
+ 
+ for(let i = 0 ; i < temp.length ; i++){
+  const from = "RideSharely"
+  const to = "91"+temp[i]
+  console.log(to);
+  const text = 'Your ride is cancelled by the publisher due to some reason. Please find another ride . Sorry for the incovenience'
+   await vonage.message.sendSms(from, to, text, (err, responseData) => {
+      if (err) {
+          console.log(err);
+      } else {
+          if(responseData.messages[0]['status'] === "0") {
+              console.log("Message sent successfully.");
+          } else {
+              console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
+          }
+      }
+  });
+ }
 
   if (status) return response.status(200).json({ msg: "cancel" });
 };
@@ -593,15 +624,21 @@ exports.cancelRideByBooker = async (request, response) => {
     }
   )
     .then(async (result) => {
-      var option = {
-        authorization:
-          "kAHrGWQ7EdUgB5sR6ehbCyLJuTnX82iPOc1pYZl9Sw0mzjvoK4fcXF9uO3AbhYdaBke2EVZWjLlPCyTz",
-        message:
-          "Your Request Cancelled By Booker, Your currently seatAvailable is " +
-          (booker.seatWant + publisher.seatAvailable),
-        numbers: [publisher.publisherId.mobile],
-      };
-      await fast2sms.sendMessage(option);
+      const from = "RideSharely"
+      const to = "91"+publisher.publisherId.mobile
+      console.log(to);
+      const text = 'Your ride is cancelled by the booker due to some reason. Your currently available seat is ' + (booker.seatWant + publisher.seatAvailable)
+       await vonage.message.sendSms(from, to, text, (err, responseData) => {
+          if (err) {
+              console.log(err);
+          } else {
+              if(responseData.messages[0]['status'] === "0") {
+                  console.log("Message sent successfully.");
+              } else {
+                  console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
+              }
+          }
+      });
       return response.status(200).json(result);
     })
     .catch((err) => {
