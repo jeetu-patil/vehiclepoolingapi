@@ -19,8 +19,7 @@ cloudinary.config({
 
 //check it is first ride or not
 exports.checkUserRidePublish = (request, response) => {
-
-  if(request.body.id)
+  if(!request.body.id)
     return response.status(500).json({msg:"error"});
 
   const errors = validationResult(request);
