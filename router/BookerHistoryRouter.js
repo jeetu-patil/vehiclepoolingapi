@@ -4,7 +4,7 @@ const bookHistoryController = require("../controller/BookerHistoryController");
 const jwtAuth=require("../Authentication/Authenticate");
 
 
-router.get("/viewbookerhistory/:bookerId",jwtAuth.tokenauthotication,bookHistoryController.viewBookerHistory);
+router.get("/viewbookerhistory/:bookerId",bookHistoryController.viewBookerHistory);
 
 
 module.exports =router;

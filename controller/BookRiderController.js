@@ -39,7 +39,7 @@ exports.isAccepted=(request,response)=>{
 exports. getBookRides=(request, response) => {
     temp=[];
     r=[];
-    BookRide.find({bookerId:request.params.bookerId,isAccepted:true}).sort({date:"desc"})
+    BookRide.find({bookerId:request.body.bookerId,isAccepted:true}).sort({date:"desc"})
     .populate("bookerId")
     .then(async result=>{
         for(var i=0; i<result.length; i++){
