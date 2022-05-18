@@ -26,7 +26,7 @@ cloudinary.config({
 
 exports.signUp = (request, response) => {
 
-    if(request.body.user)
+    if(!request.body.user)
         return response.status(500).json({msg:"error"});
 
     const errors = validationResult(request);
@@ -151,9 +151,6 @@ exports.loginWithGoogle= (request, response) => {
 
 
 exports.signIn = (request, response) => {
-
-    if(request.body.password && request.body.email)
-        return response.status(500).json({msg:"error"});
 
     const errors = validationResult(request);
     if (!errors.isEmpty())
