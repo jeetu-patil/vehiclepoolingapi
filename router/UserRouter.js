@@ -32,7 +32,7 @@ router.post("/signin",
 // body("age").notEmpty().isNumeric(),
 // userController.editProfile);
 
-router.get("/verify-mobile/:mobile/:userId",
+router.get("/verify-mobile/:mobile/:userId",      
 userController.verifyMobile);
 
 router.get("/verifymobile/:mobile",userController.confirmMobileVerification);
