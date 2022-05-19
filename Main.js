@@ -4,7 +4,7 @@ const bodyParser=require('body-parser');
 const mongoose=require('mongoose');
 const app = express();
 const path=require("path");
-
+const port = process.env.PORT || 3000 ;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname,"public")));
@@ -34,6 +34,6 @@ mongoose.connect("mongodb+srv://jitu:jitu%40123@cluster0.5msi4.mongodb.net/carpo
    console.log(err);
 });
 
-app.listen(3000,()=>{
+app.listen(port,()=>{
     console.log("Server Started At Port 3000");
 });
