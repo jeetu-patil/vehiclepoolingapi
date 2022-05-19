@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 const adminRouter=require("./router/AdminRouter");
 const placeRouter=require("./router/PlaceRouter");
-const userRouter = require("./router/UserRouter");
+const userRouter = require("./router/UserRouter");           
 const publishRideRouter=require("./router/PublishRideRouter");
 const bookRideRouter = require("./router/BookRideRouter");
 const bookerHistoryRouter = require("./router/BookerHistoryRouter");
