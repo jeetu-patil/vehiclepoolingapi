@@ -60,9 +60,9 @@ exports.signUp = (request, response) => {
             var message = {
                 from: "vastram823@gmail.com",
                 to: request.body.email,
-                subject: "Confirm your account on Chalo saath chale",
+                subject: "Confirm your account on RideSharely",
                 html:
-                    '<p>Thanks for signing up with Book-Your-Meal! You must follow this link within 30 days of registration to activate your account:</p><a href= "http://localhost:3000/user/verify-email/' +
+                    '<p>Thanks for signing up with RideSharely! You must follow this link within 30 days of registration to activate your account:</p><a href= "https://ridesharely-backend-api.herokuapp.com/user/verify-email/' +
                     result._id +
                     '">click here to verify your account</a><p>Have fun, and dont hesitate to contact us with your feedback</p><br><p> The Book-Us-Meal Team</p><a href="https://book-your-meal.herokuapp.com/">book-your-meal.herokuapp.com/</a>'
             };
