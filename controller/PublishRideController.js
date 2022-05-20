@@ -490,7 +490,7 @@ exports.cancelRide = async (request, response) => {
   //   await publisherCancelHistory.findOne({rideId:request.params.rideId}).
   //   then(ans=>{     
   //     if(!ans){
-  //       ans=new PubliserCancelHistory();
+  //       ans=new PubliserCancelHistory();     
   //       ans.rideId=request.params.rideId;
   //       ans.publisherId=request.params.publisherId;
   //     }
