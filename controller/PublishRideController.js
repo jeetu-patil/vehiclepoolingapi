@@ -483,7 +483,7 @@ exports.cancelRide = async (request, response) => {
 
   for (k = 0; k < otp.length; i++, k++) {
     temp[i] = otp[k].bookerId.mobile;
-    //cancelBooker[i]=otp[k].bookerId._id;
+    //cancelBooker[i]=otp[k].bookerId._id; 
   }
 
   // for(i=0;cancelBooker.length;i++){
