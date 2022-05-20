@@ -1,7 +1,17 @@
 const BookRide= require("../model/BookRide");
 const PublishRide = require("../model/PublishRide");
 const { validationResult } = require("express-validator");
-exports.bookRide= (request, response) => {
+exports.bookRide=async (request, response) => {
+
+    let ride=await BookRide.find({rideId:request.body.rideId}).populate("rideId");
+    let publishRide=await PublishRide.findOne({_id:request.body.rideId});
+
+    for(var i=0;i<ride.length;i++){
+        if((ride[i].rideId.fromId.toString()==publishRide.fromId.toString())&&(ride[i].rideId.toId.toString()==publishRide.toId.toString())&&(ride[i].rideId.rideDate==publishRide.rideDate&&ride[i].bookerId==request.body.bookerId)){
+            return response.status(200).json({msg:"already available"});
+        }
+    }
+
     BookRide.create({
         bookerId: request.body.bookerId,
         rideId: request.body.rideId,

@@ -1,6 +1,7 @@
 const PublishRide = require("../model/PublishRide");
 const BookerHistory = require("../model/BookerHistory");
 const { validationResult } = require("express-validator");
+const publisherCancelHistory= require("../model/PublisherCancelHistory");
 const User = require("../model/User");
 const cloudinary = require("cloudinary");
 const BookRide = require("../model/BookRide");
@@ -216,15 +217,6 @@ exports.showRequestToThePublisher = (request, response) => {
 exports.declineRequestOfBooker = (request, response) => {
   User.findOne({ _id: request.params.bookerId })
     .then(async (result) => {
-      console.log(result.mobile);
-      // var option = {
-      //   authorization:
-      //     "kAHrGWQ7EdUgB5sR6ehbCyLJuTnX82iPOc1pYZl9Sw0mzjvoK4fcXF9uO3AbhYdaBke2EVZWjLlPCyTz",
-      //   message: "Your Request For The Ride Is Declined Please Find Other Ride",
-      //   numbers: [result.mobile],
-      // };
-      // await fast2sms.sendMessage(option);
-
       const from = "RideSharely"
       const to = "91"+result.mobile
       const text = 'Your Request for the ride is declined by the publisher . Please find other ride . Sorry for the inconvenience'
@@ -455,9 +447,6 @@ exports.matchOtp = async (request, response) => {
             bh.publisherId.push(request.body.publisherId);
             bh.save()
               .then(async (result) => {
-                console.log("enter 2");
-                console.log(request.params.publierId);
-                console.log(bookerId);
                 await BookRide.deleteOne({ _id: request.body.id });
               })
               .catch((err) => {
@@ -484,15 +473,32 @@ exports.cancelRide = async (request, response) => {
   let publisherRequest = pr.publisherRequest;
   let temp = [];
   let status = false;
+  cancelBooker=[];
   let i,
     k = 0;
   for (i = 0; i < publisherRequest.length; i++) {
-    temp[i] = publisherRequest[i].mobile;
+    temp[i] = publisherRequest[i].userId.mobile;
+    //cancelBooker[i]=publisherRequest[i].userId._id;
   }
 
-  for (i = i; i < otp.length; i++, k++) {
+  for (k = 0; k < otp.length; i++, k++) {
     temp[i] = otp[k].bookerId.mobile;
+    //cancelBooker[i]=otp[k].bookerId._id;
   }
+
+  // for(i=0;cancelBooker.length;i++){
+  //   await publisherCancelHistory.findOne({rideId:request.params.rideId}).
+  //   then(ans=>{
+  //     if(!ans){
+  //       ans=new PubliserCancelHistory();
+  //       ans.rideId=request.params.rideId;
+  //       ans.publisherId=request.params.publisherId;
+  //     }
+  //     ans.bookerId.push(cancelBooker[i]);
+  //     ans.save();
+  //   });
+    
+  // }
 
   await PublishRide.updateOne(
     { _id: request.params.rideId },
@@ -598,6 +604,8 @@ exports.getRidesForBooker = (request, response) => {
     });
 };
 
+
+//if cancell by booker
 exports.cancelRideByBooker = async (request, response) => {
   let i;
   let publisher = await PublishRide.findOne({
@@ -618,6 +626,9 @@ exports.cancelRideByBooker = async (request, response) => {
   publisher.save();
 
   await BookRide.deleteOne({ _id: request.params.bookRideId });
+
+  await publisher.cancelUser.push(request.params.bookerId);
+  await publisher.save();
 
   PublishRide.updateOne(
     { _id: request.params.rideId },

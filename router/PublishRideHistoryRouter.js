@@ -4,5 +4,6 @@ const publishRideController = require("../controller/PublishRideHistoryControlle
 
 router.get("/viewpublisherhistory/:rideId", publishRideController.viewPublisherHistory);
 router.get("/publishhistiry/:publisherId", publishRideController.publishHistory);
+router.post("/publishercancelhistory",publishRideController.publisherCancelHistory);
 
 module.exports =router;
