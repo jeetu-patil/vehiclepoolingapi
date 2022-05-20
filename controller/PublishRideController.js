@@ -488,7 +488,7 @@ exports.cancelRide = async (request, response) => {
 
   // for(i=0;cancelBooker.length;i++){
   //   await publisherCancelHistory.findOne({rideId:request.params.rideId}).
-  //   then(ans=>{
+  //   then(ans=>{     
   //     if(!ans){
   //       ans=new PubliserCancelHistory();
   //       ans.rideId=request.params.rideId;
