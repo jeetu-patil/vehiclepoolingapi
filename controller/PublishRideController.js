@@ -1,7 +1,6 @@
 const PublishRide = require("../model/PublishRide");
 const BookerHistory = require("../model/BookerHistory");
 const { validationResult } = require("express-validator");
-const publisherCancelHistory= require("../model/PublisherCancelHistory");
 const User = require("../model/User");
 const cloudinary = require("cloudinary");
 const BookRide = require("../model/BookRide");
@@ -473,32 +472,14 @@ exports.cancelRide = async (request, response) => {
   let publisherRequest = pr.publisherRequest;
   let temp = [];
   let status = false;
-  cancelBooker=[];
   let i,
     k = 0;
-  for (i = 0; i < publisherRequest.length; i++) {
+  for (i = 0; i < publisherRequest.length; i++) 
     temp[i] = publisherRequest[i].userId.mobile;
-    //cancelBooker[i]=publisherRequest[i].userId._id;
-  }
 
-  for (k = 0; k < otp.length; i++, k++) {
+  for (k = 0; k < otp.length; i++, k++) 
     temp[i] = otp[k].bookerId.mobile;
-    //cancelBooker[i]=otp[k].bookerId._id;
-  }
 
-  // for(i=0;cancelBooker.length;i++){
-  //   await publisherCancelHistory.findOne({rideId:request.params.rideId}).
-  //   then(ans=>{
-  //     if(!ans){
-  //       ans=new PubliserCancelHistory();
-  //       ans.rideId=request.params.rideId;
-  //       ans.publisherId=request.params.publisherId;
-  //     }
-  //     ans.bookerId.push(cancelBooker[i]);
-  //     ans.save();
-  //   });
-    
-  // }
 
   await PublishRide.updateOne(
     { _id: request.params.rideId },
@@ -626,9 +607,6 @@ exports.cancelRideByBooker = async (request, response) => {
   publisher.save();
 
   await BookRide.deleteOne({ _id: request.params.bookRideId });
-
-  await publisher.cancelUser.push(request.params.bookerId);
-  await publisher.save();
 
   PublishRide.updateOne(
     { _id: request.params.rideId },
