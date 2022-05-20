@@ -64,6 +64,12 @@ const publishRideSchema = new mongoose.Schema({
     isRideStarted:{
         type:Boolean
     },
+    cancelUser:[
+        { 
+            type:Schema.Types.ObjectId,
+            ref:"user"
+        }
+    ],
     isTimeExpired:{type:Boolean,default:false},
     publisherRequest:[
         {

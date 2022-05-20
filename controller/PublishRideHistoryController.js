@@ -1,5 +1,5 @@
-const PulishRideHistory=require("../model/PublishRidesHistory");
 const PublishRide= require("../model/PublishRide");
+const PublishHistory=require("../model/PublisherCancelHistory")
 
 exports.viewPublisherHistory= (request, response) => {
     temp=[];
@@ -38,4 +38,14 @@ exports.publishHistory= async (request, response) => {
     }
 
     return response.status(200).json(temp);
+};
+
+exports.publisherCancelHistory= (request, response) => {
+    PublishHistory.find({publisherId:request.body.publisherId}).populate("rideId")
+    .then((result) => {
+        return response.status(200).json(result);
+    })
+    .catch((err) => {
+        return response.status(500).json(err);
+    });
 };
