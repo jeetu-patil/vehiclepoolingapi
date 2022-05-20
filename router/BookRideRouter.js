@@ -10,5 +10,5 @@ router.get("/iscancelled/:Id",bookRiderController.isCancelled)
 router.get("/isaccepted/:Id",bookRiderController.isAccepted);
 router.post("/getbookrides",bookRiderController.getBookRides);
 
-
+    
 module.exports =router;
