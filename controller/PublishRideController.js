@@ -278,7 +278,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
     publisherId: request.params.publisherId,
     _id: request.params.rideId,
   }).populate("publisherId");
-  let booker = await BookRide.findOne({
+  let booker = await BookRide.findOne({  
     _id: request.params.bookRideId,
   }).populate("bookerId");
   console.log(
