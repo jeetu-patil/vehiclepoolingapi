@@ -8,7 +8,7 @@ exports.bookRide=async (request, response) => {
 
     for(var i=0;i<ride.length;i++){
         if((ride[i].rideId.fromId.toString()==publishRide.fromId.toString())&&(ride[i].rideId.toId.toString()==publishRide.toId.toString())&&(ride[i].rideId.rideDate==publishRide.rideDate&&ride[i].bookerId==request.body.bookerId)){
-            return response.status(200).json({msg:"already available"});
+            return response.status(200).json({msg:"already available"});     
         }
     }
 
