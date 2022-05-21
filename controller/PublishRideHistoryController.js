@@ -32,8 +32,8 @@ exports.publishHistory= async (request, response) => {
     for(i=0; i<result.length; i++){
         temp[i]=result[i];
     }
-    for(i=i; i<result1.length; i++){
-        temp[i]=result1[i];
+    for( var k=0; k<result1.length; k++,i++){
+        temp[i]=result1[k];
     }
 
     return response.status(200).json(temp);
