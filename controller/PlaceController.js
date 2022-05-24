@@ -19,6 +19,9 @@ exports.addPlace = function(request,response) {
 };
 
 exports.getAllPlaces= (request, response) => {
+    const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
     Place.find()
     .then(result=>{
         return response.status(200).json(result);

@@ -18,6 +18,9 @@ exports.signin=(request,response) => {
 };
 
 exports.userList = (request,response)=>{
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
    User.find().then((result) => {
        return response.status(200).json(result);
    }).catch((err) => {
@@ -26,6 +29,9 @@ exports.userList = (request,response)=>{
 }
 
 exports.allPublishRidesForUser= (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
     PublishRide.find()
     .populate("publisherId").populate("fromId").populate("toId")
     .then((result) => {
@@ -38,6 +44,9 @@ exports.allPublishRidesForUser= (request, response) => {
 };
 
 exports.bookRides= (request,response)=>{
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
     BookRide.find()
     .populate("rideId").populate("bookerId")
     .then((result) => {

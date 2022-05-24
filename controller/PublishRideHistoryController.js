@@ -1,9 +1,12 @@
 const PublishRide= require("../model/PublishRide");
 
 exports.viewPublisherHistory= (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
     temp=[];
     k=0;
-    PublishRide.find({_id:request.params.rideId})
+    PublishRide.find({_id:request.body.rideId})
     .populate("historyOfUser")
     .then(async result=>{
         for(var i=0; i<result.length; i++)
@@ -18,12 +21,15 @@ exports.viewPublisherHistory= (request, response) => {
 
 
 exports.publishHistory= async (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
     let temp=[];
     let i=0;
-    let result=await PublishRide.find({publisherId: request.params.publisherId,isBooked:true}).sort({date: 'desc'})
+    let result=await PublishRide.find({publisherId: request.body.publisherId,isBooked:true}).sort({date: 'desc'})
     .populate("publisherRequest").populate("fromId").populate("toId");
     
-    let result1=await PublishRide.find({publisherId: request.params.publisherId,isTimeExpired:true}).sort({date: 'desc'})
+    let result1=await PublishRide.find({publisherId: request.body.publisherId,isTimeExpired:true}).sort({date: 'desc'})
     .populate("publisherRequest").populate("fromId").populate("toId");
 
     console.log(result1)
