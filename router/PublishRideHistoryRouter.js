@@ -4,6 +4,6 @@ const router = express.Router();
 const publishRideController = require("../controller/PublishRideHistoryController");
 
 router.post("/viewpublisherhistory",body("rideId").notEmpty(),publishRideController.viewPublisherHistory);
-router.post("/publishhistiry",body("publisherId").notEmpty(), publishRideController.publishHistory);
+router.post("/publishhistiry",body("userId").notEmpty(), publishRideController.publishHistory);
 
 module.exports =router;
