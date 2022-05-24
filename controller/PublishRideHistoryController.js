@@ -1,4 +1,5 @@
 const PublishRide= require("../model/PublishRide");
+const {validationResult}=require("express-validator");
 
 exports.viewPublisherHistory= (request, response) => {
     const errors = validationResult(request);
@@ -26,15 +27,11 @@ exports.publishHistory= async (request, response) => {
         return response.status(400).json({ errors: errors.array() });
     let temp=[];
     let i=0;
-    let result=await PublishRide.find({publisherId: request.body.publisherId,isBooked:true}).sort({date: 'desc'})
+    let result=await PublishRide.find({publisherId: request.body.userId,isBooked:true}).sort({date: 'desc'})
     .populate("publisherRequest").populate("fromId").populate("toId");
     
-    let result1=await PublishRide.find({publisherId: request.body.publisherId,isTimeExpired:true}).sort({date: 'desc'})
+    let result1=await PublishRide.find({publisherId: request.body.userId,isTimeExpired:true}).sort({date: 'desc'})
     .populate("publisherRequest").populate("fromId").populate("toId");
-
-    console.log(result1)
-    console.log(result)
-
     for(i=0; i<result.length; i++){
         temp[i]=result[i];
     }
