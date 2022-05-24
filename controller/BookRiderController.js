@@ -1,7 +1,10 @@
 const BookRide= require("../model/BookRide");
 const PublishRide = require("../model/PublishRide");
-const { validationResult } = require("express-validator");
+const { validationResult, body } = require("express-validator");
 exports.bookRide=async (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
 
     let ride=await BookRide.find({rideId:request.body.rideId}).populate("rideId");
     let publishRide=await PublishRide.findOne({_id:request.body.rideId});
@@ -16,6 +19,7 @@ exports.bookRide=async (request, response) => {
         bookerId: request.body.bookerId,
         rideId: request.body.rideId,
         seatWant: request.body.seat,
+        
     })
     .then(result => {
         return response.status(200).json(result);
@@ -25,9 +29,12 @@ exports.bookRide=async (request, response) => {
     });
 };
 exports.isCancelled=(request,response)=>{
-    console.log(request.params)
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
+    console.log(request.Id)
     BookRide.updateOne(
-        {passangerId:request.params.Id},{
+        {passangerId:request.body.Id},{
         set$:
             {
             isCancelled:true
@@ -43,10 +50,22 @@ exports.isCancelled=(request,response)=>{
     })
 }
 exports.isAccepted=(request,response)=>{
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        console.log("Err")
+        console.log(errors);
+        return response.status(400).json({ errors1: errors.array() });
+         
+        console.log(request.body);
+         console.log(request.body.Id);
+         return response.status(200).json({godFather:"Prabhu Ram"});
     
 }
 
 exports. getBookRides=(request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
     temp=[];
     r=[];
     BookRide.find({bookerId:request.body.bookerId,isAccepted:true}).sort({date:"desc"})

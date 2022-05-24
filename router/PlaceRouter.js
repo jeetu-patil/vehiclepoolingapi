@@ -15,7 +15,7 @@ var storage = multer.diskStorage(
     }
 );
 var upload = multer({storage : storage});
-router.post("/addplace",placeController.addPlace);
+router.post("/addplace",body("place").notEmpty(),body("longitude").notEmpty(),body("latitude").notEmpty(),placeController.addPlace);
 router.get("/getallplace",placeController.getAllPlaces);
 router.post("/add-csv",upload.single("file"),(req,res)=>{
     csv().fromFile(req.file.path).then(json=>{

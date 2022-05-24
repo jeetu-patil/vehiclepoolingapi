@@ -20,8 +20,11 @@ router.post("/signup",
     body("age").isNumeric(),
     body("aadhar").isLength(12),
     userController.signUp);
-    router.post("/edit-profile",upload.single("image"),userController.editProfileNMI)
-router.get("/verify-email/:id",userController.verifyEmail);
+    router.post("/edit-profile",body("name").notEmpty(),
+    body("userId").notEmpty(),
+    body("miniBio").notEmpty(),
+    upload.single("image"),userController.editProfileNMI)
+router.body("/verify-email",body("id").notEmpty,userController.verifyEmail);
 
 router.post("/signin",
     body("email").isEmail().notEmpty(),
@@ -32,15 +35,19 @@ router.post("/signin",
 // body("age").notEmpty().isNumeric(),
 // userController.editProfile);
 
-router.get("/verify-mobile/:mobile/:userId",      
+router.post("/verify-mobile",body("mobile").notEmpty(),body("userId").notEmpty(),      
 userController.verifyMobile);
 
-router.get("/verifymobile/:mobile",userController.confirmMobileVerification);
+router.post("/verifymobile",body("mobile").notEmpty(),userController.confirmMobileVerification);
 
 router.post("/loginwithgoogle",userController.loginWithGoogle);
 
-router.get("/getuser/:id",userController.singleUser);
+router.post("/getuser",body("id").notEmpty(),
+            userController.singleUser);
 
-router.post("/addcomment", userController.addComment);
+router.post("/addcomment",body("userId").notEmpty(),
+body("uId").notEmpty(),
+body("feadback").notEmpty(),
+userController.addComment);
 
 module.exports = router;
