@@ -4,7 +4,7 @@ const {body}=require('express-validator');
 const bookHistoryController = require("../controller/BookerHistoryController");
 const jwtAuth=require("../Authentication/Authenticate");
 router.post("/viewbookerhistory",
-   body("bookerId").isEmail().notEmpty(),
+   body("bookerId").notEmpty(),
    bookHistoryController.viewBookerHistory);
 
 

@@ -13,7 +13,7 @@ router.post("/book",body("bookerId").notEmpty(),
 router.post("/iscancelled",
  body("Id").notEmpty(),bookRiderController.isCancelled);
 router.post("/isaccepted",body("Id"),bookRiderController.isAccepted);
-router.post("/getbookrides",body("Id").notEmpty(),bookRiderController.getBookRides);
+router.post("/getbookrides",body("bookerId").notEmpty(),bookRiderController.getBookRides);
 
     
 module.exports =router;

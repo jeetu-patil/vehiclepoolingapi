@@ -1,6 +1,7 @@
 const BookerHistory=require("../model/BookerHistory");
 const PublishRide = require("../model/PublishRide");
 const User=require("../model/User");
+const {validationResult}= require("express-validator");
 
 exports.viewBookerHistory= (request, response) => {
     const errors = validationResult(request);
