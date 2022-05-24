@@ -24,7 +24,7 @@ router.post("/signup",
     body("userId").notEmpty(),
     body("miniBio").notEmpty(),
     upload.single("image"),userController.editProfileNMI)
-router.body("/verify-email",body("id").notEmpty,userController.verifyEmail);
+router.post("/verify-email",body("id").notEmpty(),userController.verifyEmail);
 
 router.post("/signin",
     body("email").isEmail().notEmpty(),

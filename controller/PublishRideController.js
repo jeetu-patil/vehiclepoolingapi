@@ -25,9 +25,6 @@ exports.checkUserRidePublish = (request, response) => {
   if(!request.body.id)
     return response.status(500).json({msg:"error"});
 
-  const errors = validationResult(request);
-  if (!errors.isEmpty())
-    return response.status(400).json({ errors: errors.array() });
   User.findOne({ _id: request.body.id })
     .then((result) => {
       if (result.publishRideCount > 0)
