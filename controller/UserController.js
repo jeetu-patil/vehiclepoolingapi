@@ -176,7 +176,7 @@ exports.signIn = (request, response) => {
                     let payload = { subject: result._id };
                     let token = jwt.sign(payload, "aabbccdd");
                     return response.status(200)
-                        .json({
+                        .json({       
                             status: "Login Success",
                             result: result,
                             token: token
