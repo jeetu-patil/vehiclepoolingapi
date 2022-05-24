@@ -1,10 +1,11 @@
 const express=require("express");
 const router = express.Router();
+const {body}=require('express-validator');
 const bookHistoryController = require("../controller/BookerHistoryController");
 const jwtAuth=require("../Authentication/Authenticate");
-
-
-router.get("/viewbookerhistory/:bookerId",bookHistoryController.viewBookerHistory);
+router.post("/viewbookerhistory",
+   body("bookerId").isEmail().notEmpty(),
+   bookHistoryController.viewBookerHistory);
 
 
 module.exports =router;

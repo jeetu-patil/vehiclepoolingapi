@@ -19,12 +19,12 @@ cloudinary.config({
 
 //check it is first ride or not
 exports.checkUserRidePublish = (request, response) => {
-  if(!request.body.id)
-    return response.status(500).json({msg:"error"});
-
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
+  if(!request.body.id)
+    return response.status(500).json({msg:"error"});
+
   User.findOne({ _id: request.body.id })
     .then((result) => {
       if (result.publishRideCount > 0)
@@ -70,6 +70,9 @@ exports.firstPublishRide = async (request, response) => {
 
 //here publisher pusblish ride
 exports.publishRide = (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   var data;
   var today = new Date();
   var date =
@@ -121,6 +124,9 @@ exports.publishRide = (request, response) => {
 
 //here booker request to the publisher
 exports.requestForPublisher = async (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   let obj = {
     userId: request.body.bookerId,
     bookRideId: request.body.bookRideId,
@@ -140,6 +146,9 @@ exports.requestForPublisher = async (request, response) => {
 
 //here we display all available publisher
 exports.allPublishRidesForUser = async (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   let publish = await PublishRide.find({
     isTimeExpired: false,
     isBooked: false,
@@ -177,6 +186,9 @@ exports.allPublishRidesForUser = async (request, response) => {
 
 //here get all publish rides of particular user
 exports.getPublishRidesOfSingle = async (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   await PublishRide.find({
     publisherId: request.body.publisherId,
     isBooked: false,
@@ -196,6 +208,9 @@ exports.getPublishRidesOfSingle = async (request, response) => {
 
 //showing request to the publisher
 exports.showRequestToThePublisher = (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   PublishRide.findOne({
     publisherId: request.body.publisherId,
     _id: request.body.rideId,
@@ -214,7 +229,10 @@ exports.showRequestToThePublisher = (request, response) => {
 
 //if publisher decline request of booker
 exports.declineRequestOfBooker = (request, response) => {
-  User.findOne({ _id: request.params.bookerId })
+  const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
+  User.findOne({ _id: request.body.bookerId })
     .then(async (result) => {
       const from = "RideSharely"
       const to = "91"+result.mobile
@@ -231,13 +249,13 @@ exports.declineRequestOfBooker = (request, response) => {
           }
       })
 
-      PublishRide.findOne({ _id: request.params.rideId })
+      PublishRide.findOne({ _id: request.request.rideId })
         .then((answer) => {
           let pr = answer.publisherRequest;
           let bookRideId;
           let index;
           for (let i = 0; i < pr.length; i++) {
-            if (pr[i].userId == request.params.bookerId) {
+            if (pr[i].userId == request.request.bookerId) {
               bookRideId = pr[i].bookRideId;
               index = i;
               break;
@@ -274,12 +292,15 @@ exports.declineRequestOfBooker = (request, response) => {
 
 //if publisher accept booker request
 exports.acceptRequestOfBooker = async (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   let publishRider = await PublishRide.findOne({
-    publisherId: request.params.publisherId,
-    _id: request.params.rideId,
+    publisherId: request.body.publisherId,
+    _id: request.body.rideId,
   }).populate("publisherId");
-  let booker = await BookRide.findOne({  
-    _id: request.params.bookRideId,   
+  let booker = await BookRide.findOne({
+    _id: request.body.bookRideId,
   }).populate("bookerId");
   console.log(
     booker.seatWant,booker.bookerId.mobile,
@@ -288,7 +309,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
   );
   if (publishRider.seatAvailable > 0) {
     PublishRide.updateOne(
-      { _id: request.params.rideId },
+      { _id: request.body.rideId },
       {
         seatAvailable: publishRider.seatAvailable - booker.seatWant,
       }
@@ -401,6 +422,9 @@ exports.acceptRequestOfBooker = async (request, response) => {
 
 //showing all accept user by publisher
 exports.showAllAcceptRequestByPublisher = (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   PublishRide.findOne({ _id: request.params.rideId })
     .populate("otp.bookerId")
     .then((result) => {
@@ -414,6 +438,9 @@ exports.showAllAcceptRequestByPublisher = (request, response) => {
 
 //match otp which provide by user to the publisher
 exports.matchOtp = async (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   var status = false;
   var publisher = await PublishRide.findOne({ _id: request.body.rideId });
   var bookerId;
@@ -464,7 +491,10 @@ exports.matchOtp = async (request, response) => {
 
 //if publisher cancel ride
 exports.cancelRide = async (request, response) => {
-  let pr = await PublishRide.findOne({ _id: request.params.rideId })
+  const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
+  let pr = await PublishRide.findOne({ _id: request.body.rideId })
     .populate("publisherRequest")
     .populate("otp.bookerId");
 
@@ -474,14 +504,15 @@ exports.cancelRide = async (request, response) => {
   let status = false;
   let i,
     k = 0;
-  for (i = 0; i < publisherRequest.length; i++) 
+   
+    for (i = 0; i < publisherRequest.length; i++) 
     temp[i] = publisherRequest[i].userId.mobile;
 
   for (k = 0; k < otp.length; i++, k++) 
     temp[i] = otp[k].bookerId.mobile;
 
   await PublishRide.updateOne(
-    { _id: request.params.rideId },
+    { _id: request.body.rideId },
     {
       $set: {
         isCancelled: true,
@@ -537,6 +568,9 @@ exports.cancelRide = async (request, response) => {
 
 //Here we fetch particular ride
 exports.getParticualRideRequest = (request, response) => {
+  const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
   PublishRide.findOne({ _id: request.body.id })
     .populate("publisherId")
     .populate("fromId")
@@ -551,6 +585,9 @@ exports.getParticualRideRequest = (request, response) => {
 
 //all rides for booker according to date
 exports.getRidesForBooker = (request, response) => {
+  const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array() });
   statusRide = false;
   totalRides = [];
   PublishRide.find({ fromId: request.body.from, toId: request.body.to })
@@ -587,28 +624,31 @@ exports.getRidesForBooker = (request, response) => {
 
 //if cancell by booker
 exports.cancelRideByBooker = async (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+      return response.status(400).json({ errors: errors.array() });
   let i;
   let publisher = await PublishRide.findOne({
-    _id: request.params.rideId,
+    _id: request.body.rideId,
   }).populate("publisherId");
-  let booker = await BookRide.findOne({ _id: request.params.bookRideId });
-  publisher.historyOfUser.pull(request.params.bookerId);
+  let booker = await BookRide.findOne({ _id: request.body.bookRideId });
+  publisher.historyOfUser.pull(request.body.bookerId);
   publisher.save();
 
   for (i = 0; publisher.otp.length; i++) {
-    if (publisher.otp[i].bookerId == request.params.bookerId) break;
+    if (publisher.otp[i].bookerId == request.body.bookerId) break;
   }
 
   publisher = await PublishRide.findOne({
-    _id: request.params.rideId,
+    _id: request.body.rideId,
   }).populate("publisherId");
   publisher.otp.splice(i, 1);
   publisher.save();
 
-  await BookRide.deleteOne({ _id: request.params.bookRideId });
+  await BookRide.deleteOne({ _id: request.body.bookRideId });
 
   PublishRide.updateOne(
-    { _id: request.params.rideId },
+    { _id: request.body.rideId },
     {
       seatAvailable: booker.seatWant + publisher.seatAvailable,
       isBooked: false,

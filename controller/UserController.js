@@ -84,7 +84,7 @@ exports.signUp = (request, response) => {
 
 exports.verifyEmail = (request, response) => {
     User.updateOne(
-        { _id: request.params.id },
+        { _id: request.body.id },
         {
             $set: { isEmailVerified: true }
         }
@@ -100,6 +100,10 @@ exports.verifyEmail = (request, response) => {
 };
 
 exports.verifyMobile =async (request,response)=>{
+    const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
+
     let otp = otpGenerator.generate(4, { lowerCaseAlphabets:false, upperCaseAlphabets: false, specialChars: false });
     // var option = {
     //     authorization: 'HMWLTGXIS7nCxvJh9YN843qkoeE2PfrutlciFUZQm015bgRBzDUY4OltK0NwQnCWMk5ZGiDbIJjpPf2d',
@@ -107,7 +111,7 @@ exports.verifyMobile =async (request,response)=>{
     //     , numbers: [request.params.mobile]
     // }
     const from = "RideSharely"
-    const to = "91"+request.params.mobile
+    const to = "91"+request.body.mobile
     const text = 'Your OTP is '+otp+" . PLease use this OTP to verify your mobile . Thankyou"
    await vonage.message.sendSms(from, to, text, (err, responseData) => {
         if (err) {
@@ -121,13 +125,13 @@ exports.verifyMobile =async (request,response)=>{
         }
     })
     // await fast2sms.sendMessage(option);
-    User.updateOne({_id:request.params.userId},
+    User.updateOne({_id:request.body.userId},
         {
-            mobile:request.params.mobile
+            mobile:request.body.mobile
         }    
     )
     .then(async result => {
-        let a=await User.findOne({_id:request.params.userId});
+        let a=await User.findOne({_id:request.body.userId});
         console.log(otp)
         return response.status(200).json({otp : otp,user:a});
     })
@@ -138,6 +142,10 @@ exports.verifyMobile =async (request,response)=>{
 }
 
 exports.loginWithGoogle= (request, response) => {
+    const errors = validationResult(request);
+     if (!errors.isEmpty())
+      return response.status(400).json({ errors: errors.array() });
+
     User.findOne({email: request.body.email})
     .then(result=>{
         let payload = { subject: result._id };
@@ -155,6 +163,7 @@ exports.signIn = (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty())
         return response.status(400).json({ errors: errors.array()});
+
     User.findOne({ email: request.body.email })
         .then((result) => {
             var decipher = crypto.createDecipher(algo, key);
@@ -189,6 +198,7 @@ exports.editProfile = (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty())  
       return response.status(400).json({ errors: errors.array() });
+
     User.updateOne(
       { _id: request.body.userId },
       {
@@ -217,7 +227,11 @@ exports.editProfile = (request, response) => {
   
 
 exports.confirmMobileVerification= (request, response) => {
-    User.updateOne({mobile: request.params.mobile},
+    const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
+
+    User.updateOne({mobile: request.body.mobile},
         {
             isMobileVerified:true
         }    
@@ -231,7 +245,11 @@ exports.confirmMobileVerification= (request, response) => {
 };
 
 exports.singleUser = (request, response) => {
-    User.findOne({_id: request.params.id}).populate("comments.userId")
+    const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
+
+    User.findOne({_id: request.body.id}).populate("comments.userId")
     .then((user) => {
         return response.status(200).json(user);
     })
@@ -242,6 +260,10 @@ exports.singleUser = (request, response) => {
 };
 
 exports.addComment=async (request, response) => {
+    const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
+
     let comment={
         userId: request.body.userId,
         feedback: request.body.feedback,
@@ -263,7 +285,8 @@ exports.editProfileNMI = async (request, response) => {
     if (!errors.isEmpty())  
       return response.status(400).json({ errors: errors.array() });
       let image="";
-    if(request.file)
+    
+      if(request.file)
     { 
         var result=await cloudinary.v2.uploader.upload(request.file.path);
         image=result.url;
