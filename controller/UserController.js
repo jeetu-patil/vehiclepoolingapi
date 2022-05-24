@@ -12,8 +12,8 @@ var key = "password";
 var algo = "aes256";
 
 const vonage = new Vonage({
-  apiKey: "484720a0",
-  apiSecret: "Sl8CTRxULvNNSRjN"
+  apiKey: "bed73ad1",
+  apiSecret: "Gu3saUPV8zOKBbAW"
 })
     
 

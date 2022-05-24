@@ -6,11 +6,11 @@ const cloudinary = require("cloudinary");
 const BookRide = require("../model/BookRide");
 const otpGenerator = require("otp-generator");
 // const fast2sms = require("fast-two-sms");
-const Vonage = require("@vonage/server-sdk")
+const Vonage = require("@vonage/server-sdk");
 const vonage = new Vonage({
-  apiKey: "484720a0",
-  apiSecret: "Sl8CTRxULvNNSRjN"
-})
+  apiKey: "bed73ad1",
+  apiSecret: "Gu3saUPV8zOKBbAW",
+});
 cloudinary.config({
   cloud_name: "dfhuhxrw3",
   api_key: "212453663814245",
@@ -22,8 +22,7 @@ exports.checkUserRidePublish = (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
-  if(!request.body.id)
-    return response.status(500).json({msg:"error"});
+  if (!request.body.id) return response.status(500).json({ msg: "error" });
 
   User.findOne({ _id: request.body.id })
     .then((result) => {
@@ -69,7 +68,7 @@ exports.firstPublishRide = async (request, response) => {
 };
 
 //here publisher pusblish ride
-exports.publishRide = (request, response) => {
+exports.publishRide = async (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
@@ -81,6 +80,15 @@ exports.publishRide = (request, response) => {
   var datum = Date.parse(
     request.body.rideDate + "," + request.body.rideTime + ":00"
   );
+
+  let check = await PublishRide.findOne({
+    fromId: request.body.fromId,
+    toId: request.body.toId,
+    rideDate: datum,
+    publisherId: request.body.publisherId,
+  });
+
+  if (check) return response.status(200).json({ msg: "check-failed" });
 
   PublishRide.create({
     publisherId: request.body.publisherId,
@@ -160,24 +168,26 @@ exports.allPublishRidesForUser = async (request, response) => {
     .populate("fromId")
     .populate("toId");
 
-  let publish1=await PublishRide.find({
+  let publish1 = await PublishRide.find({
     isTimeExpired: false,
     isBooked: false,
     isCancelled: false,
   });
 
   for (var i = 0; i < publish1.length; i++) {
-    console.log(typeof(publish1[i].rideDate)+"<"+typeof(Date.now().toString()))
+    console.log(
+      typeof publish1[i].rideDate + "<" + typeof Date.now().toString()
+    );
     if (publish1[i].rideDate < Date.now()) {
-      console.log("Successs"+publish1[i]._id);
+      console.log("Successs" + publish1[i]._id);
       await PublishRide.updateOne(
         { _id: publish1[i]._id },
-          {
-            $set: {
-              isTimeExpired: true,
-              publisherRequest: [],
-            },
-          }
+        {
+          $set: {
+            isTimeExpired: true,
+            publisherRequest: [],
+          },
+        }
       );
     }
   }
@@ -230,32 +240,38 @@ exports.showRequestToThePublisher = (request, response) => {
 //if publisher decline request of booker
 exports.declineRequestOfBooker = (request, response) => {
   const errors = validationResult(request);
-    if (!errors.isEmpty())
-        return response.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
+
+  console.log(request.body)
+
   User.findOne({ _id: request.body.bookerId })
     .then(async (result) => {
-      const from = "RideSharely"
-      const to = "91"+result.mobile
-      const text = 'Your Request for the ride is declined by the publisher . Please find other ride . Sorry for the inconvenience'
-     await vonage.message.sendSms(from, to, text, (err, responseData) => {
-          if (err) {
-              console.log(err);
+      const from = "RideSharely";
+      const to = "91" + result.mobile;
+      const text =
+        "Your Request for the ride is declined by the publisher . Please find other ride . Sorry for the inconvenience";
+      await vonage.message.sendSms(from, to, text, (err, responseData) => {
+        if (err) {
+          console.log(err);
+        } else {
+          if (responseData.messages[0]["status"] === "0") {
+            console.log("Message sent successfully.");
           } else {
-              if(responseData.messages[0]['status'] === "0") {
-                  console.log("Message sent successfully.");
-              } else {
-                  console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
-              }
+            console.log(
+              `Message failed with error: ${responseData.messages[0]["error-text"]}`
+            );
           }
-      })
+        }
+      });
 
-      PublishRide.findOne({ _id: request.request.rideId })
+      PublishRide.findOne({ _id: request.body.rideId })
         .then((answer) => {
           let pr = answer.publisherRequest;
           let bookRideId;
           let index;
           for (let i = 0; i < pr.length; i++) {
-            if (pr[i].userId == request.request.bookerId) {
+            if (pr[i].userId == request.body.bookerId) {
               bookRideId = pr[i].bookRideId;
               index = i;
               break;
@@ -295,6 +311,9 @@ exports.acceptRequestOfBooker = async (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
+
+  console.log(request.body);
+
   let publishRider = await PublishRide.findOne({
     publisherId: request.body.publisherId,
     _id: request.body.rideId,
@@ -302,11 +321,8 @@ exports.acceptRequestOfBooker = async (request, response) => {
   let booker = await BookRide.findOne({
     _id: request.body.bookRideId,
   }).populate("bookerId");
-  console.log(
-    booker.seatWant,booker.bookerId.mobile,
-    publishRider.amountPerPerson,
-    publishRider.totalAmount
-  );
+  
+  console.log("hiii"+(publishRider.seatAvailable - booker.seatWant))
   if (publishRider.seatAvailable > 0) {
     PublishRide.updateOne(
       { _id: request.body.rideId },
@@ -315,43 +331,54 @@ exports.acceptRequestOfBooker = async (request, response) => {
       }
     )
       .then(async (result) => {
+        console.log(result)
         let otp = otpGenerator.generate(4, {
           lowerCaseAlphabets: false,
           upperCaseAlphabets: false,
           specialChars: false,
         });
-        console.log("OTP : "+otp);
-        const from = "RideSharely"
-        const to = "91"+booker.bookerId.mobile
+        console.log("OTP : " + otp);
+        const from = "RideSharely";
+        const to = "91" + booker.bookerId.mobile;
         console.log(to);
-        const text = 'Your request for the ride is accepted . OTP for the ride is '+otp+' .  Publisher Name : '+ publishRider.publisherId.name + ', Contact: '+publishRider.publisherId.mobile+', Vehicle no.: '+publishRider.publisherId.vehicle.number
+        const text =
+          "Your request for the ride is accepted . OTP for the ride is " +
+          otp +
+          " .  Publisher Name : " +
+          publishRider.publisherId.name +
+          ", Contact: " +
+          publishRider.publisherId.mobile +
+          ", Vehicle no.: " +
+          publishRider.publisherId.vehicle.number;
 
-       await vonage.message.sendSms(from, to, text, (err, responseData) => {
-            if (err) {
-                console.log(err);
+        await vonage.message.sendSms(from, to, text, (err, responseData) => {
+          if (err) {
+            console.log(err);
+          } else {
+            if (responseData.messages[0]["status"] === "0") {
+              console.log("Message sent successfully.");
             } else {
-                if(responseData.messages[0]['status'] === "0") {
-                    console.log("Message sent successfully.");
-                } else {
-                    console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
-                }
+              console.log(
+                `Message failed with error: ${responseData.messages[0]["error-text"]}`
+              );
             }
+          }
         });
 
         let tempOtp = {
-          bookerId: request.params.bookerId,
+          bookerId: request.body.bookerId,
           otpNumber: otp,
-          bookRideId: request.params.bookRideId,
+          bookRideId: request.body.bookRideId,
         };
 
-        let a = await PublishRide.findOne({ _id: request.params.rideId });
+        let a = await PublishRide.findOne({ _id: request.body.rideId });
         a.otp.push(tempOtp);
         await a.save();
 
         await BookRide.updateOne(
-          { _id: request.params.bookRideId },
+          { _id: request.body.bookRideId },
           {
-            publisherId: request.params.publisherId,
+            publisherId: request.body.publisherId,
             totalAmount: booker.seatWant * publishRider.amountPerPerson,
             isAccepted: true,
           }
@@ -362,7 +389,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
           });
 
         await PublishRide.updateOne(
-          { _id: request.params.rideId },
+          { _id: request.body.rideId },
           {
             totalAmount:
               booker.seatWant * publishRider.amountPerPerson +
@@ -376,16 +403,16 @@ exports.acceptRequestOfBooker = async (request, response) => {
 
         if (publishRider.seatAvailable > 0) {
           let result = await PublishRide.findOne({
-            _id: request.params.rideId,
+            _id: request.body.rideId,
           });
-          result.historyOfUser.push(request.params.bookerId);
+          result.historyOfUser.push(request.body.bookerId);
           result.save();
 
-          PublishRide.findOne({ _id: request.params.rideId }).then((answer) => {
+          PublishRide.findOne({ _id: request.body.rideId }).then((answer) => {
             let pr = answer.publisherRequest;
             let index;
             for (let i = 0; i < pr.length; i++) {
-              if (pr[i].userId == request.params.bookerId) {
+              if (pr[i].userId == request.body.bookerId) {
                 index = i;
                 break;
               }
@@ -394,12 +421,12 @@ exports.acceptRequestOfBooker = async (request, response) => {
             answer.save();
           });
           publishRider = await PublishRide.findOne({
-            publisherId: request.params.publisherId,
-            _id: request.params.rideId,
+            publisherId: request.body.publisherId,
+            _id: request.body.rideId,
           });
           if (publishRider.seatAvailable <= 0) {
             await PublishRide.updateOne(
-              { _id: request.params.rideId },
+              { _id: request.body.rideId },
               {
                 $set: {
                   isBooked: true,
@@ -425,7 +452,7 @@ exports.showAllAcceptRequestByPublisher = (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
-  PublishRide.findOne({ _id: request.params.rideId })
+  PublishRide.findOne({ _id: request.body.rideId })
     .populate("otp.bookerId")
     .then((result) => {
       console.log(result);
@@ -492,8 +519,8 @@ exports.matchOtp = async (request, response) => {
 //if publisher cancel ride
 exports.cancelRide = async (request, response) => {
   const errors = validationResult(request);
-    if (!errors.isEmpty())
-        return response.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   let pr = await PublishRide.findOne({ _id: request.body.rideId })
     .populate("publisherRequest")
     .populate("otp.bookerId");
@@ -504,12 +531,11 @@ exports.cancelRide = async (request, response) => {
   let status = false;
   let i,
     k = 0;
-   
-    for (i = 0; i < publisherRequest.length; i++) 
+
+  for (i = 0; i < publisherRequest.length; i++)
     temp[i] = publisherRequest[i].userId.mobile;
 
-  for (k = 0; k < otp.length; i++, k++) 
-    temp[i] = otp[k].bookerId.mobile;
+  for (k = 0; k < otp.length; i++, k++) temp[i] = otp[k].bookerId.mobile;
 
   await PublishRide.updateOne(
     { _id: request.body.rideId },
@@ -544,24 +570,27 @@ exports.cancelRide = async (request, response) => {
         console.error(err);
       });
   }
- 
- for(let i = 0 ; i < temp.length ; i++){
-  const from = "RideSharely"
-  const to = "91"+temp[i]
-  console.log(to);
-  const text = 'Your ride is cancelled by the publisher due to some reason. Please find another ride . Sorry for the incovenience'
-   await vonage.message.sendSms(from, to, text, (err, responseData) => {
+
+  for (let i = 0; i < temp.length; i++) {
+    const from = "RideSharely";
+    const to = "91" + temp[i];
+    console.log(to);
+    const text =
+      "Your ride is cancelled by the publisher due to some reason. Please find another ride . Sorry for the incovenience";
+    await vonage.message.sendSms(from, to, text, (err, responseData) => {
       if (err) {
-          console.log(err);
+        console.log(err);
       } else {
-          if(responseData.messages[0]['status'] === "0") {
-              console.log("Message sent successfully.");
-          } else {
-              console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
-          }
+        if (responseData.messages[0]["status"] === "0") {
+          console.log("Message sent successfully.");
+        } else {
+          console.log(
+            `Message failed with error: ${responseData.messages[0]["error-text"]}`
+          );
+        }
       }
-  });
- }
+    });
+  }
 
   if (status) return response.status(200).json({ msg: "cancel" });
 };
@@ -569,8 +598,8 @@ exports.cancelRide = async (request, response) => {
 //Here we fetch particular ride
 exports.getParticualRideRequest = (request, response) => {
   const errors = validationResult(request);
-    if (!errors.isEmpty())
-        return response.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   PublishRide.findOne({ _id: request.body.id })
     .populate("publisherId")
     .populate("fromId")
@@ -586,8 +615,8 @@ exports.getParticualRideRequest = (request, response) => {
 //all rides for booker according to date
 exports.getRidesForBooker = (request, response) => {
   const errors = validationResult(request);
-    if (!errors.isEmpty())
-        return response.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
   statusRide = false;
   totalRides = [];
   PublishRide.find({ fromId: request.body.from, toId: request.body.to })
@@ -621,12 +650,11 @@ exports.getRidesForBooker = (request, response) => {
     });
 };
 
-
 //if cancell by booker
 exports.cancelRideByBooker = async (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
-      return response.status(400).json({ errors: errors.array() });
+    return response.status(400).json({ errors: errors.array() });
   let i;
   let publisher = await PublishRide.findOne({
     _id: request.body.rideId,
@@ -655,20 +683,24 @@ exports.cancelRideByBooker = async (request, response) => {
     }
   )
     .then(async (result) => {
-      const from = "RideSharely"
-      const to = "91"+publisher.publisherId.mobile
+      const from = "RideSharely";
+      const to = "91" + publisher.publisherId.mobile;
       console.log(to);
-      const text = 'Your ride is cancelled by the booker due to some reason. Your currently available seat is ' + (booker.seatWant + publisher.seatAvailable)
-       await vonage.message.sendSms(from, to, text, (err, responseData) => {
-          if (err) {
-              console.log(err);
+      const text =
+        "Your ride is cancelled by the booker due to some reason. Your currently available seat is " +
+        (booker.seatWant + publisher.seatAvailable);
+      await vonage.message.sendSms(from, to, text, (err, responseData) => {
+        if (err) {
+          console.log(err);
+        } else {
+          if (responseData.messages[0]["status"] === "0") {
+            console.log("Message sent successfully.");
           } else {
-              if(responseData.messages[0]['status'] === "0") {
-                  console.log("Message sent successfully.");
-              } else {
-                  console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
-              }
+            console.log(
+              `Message failed with error: ${responseData.messages[0]["error-text"]}`
+            );
           }
+        }
       });
       return response.status(200).json(result);
     })
