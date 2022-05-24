@@ -8,8 +8,8 @@ const otpGenerator = require("otp-generator");
 // const fast2sms = require("fast-two-sms");
 const Vonage = require("@vonage/server-sdk");
 const vonage = new Vonage({
-  apiKey: "484720a0",
-  apiSecret: "Sl8CTRxULvNNSRjN",
+  apiKey: "bed73ad1",
+  apiSecret: "Gu3saUPV8zOKBbAW",
 });
 cloudinary.config({
   cloud_name: "dfhuhxrw3",
