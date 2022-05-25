@@ -149,58 +149,71 @@ exports.verifyMobile = async (request, response) => {
     });
 };
 
-exports.loginWithGoogle = (request, response) => {
+exports.loginWithGoogle = async (request, response) => {
+  console.log(request.body)
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
+
+  let user = await User.findOne({ email: request.body.email });
+
+  if (!user) {
+    User.create({
+      email: request.body.email,
+      name: request.body.name,
+    })
+      .then((result) => {
+        let payload = { subject: result._id };
+        let token = jwt.sign(payload, "aabbccdd");
+        return response
+          .status(200)
+          .json({ status: "Login Success", result: result, token: token });
+      })
+      .catch((error) => {
+        return response.status(500).json(err);
+      });
+  } else {
+    let payload = { subject: user._id };
+    let token = jwt.sign(payload, "aabbccdd");
+    return response
+      .status(200)
+      .json({ status: "Login Success", result: user, token: token });
+  }
+  return response.status(200).json(user);
+};
+
+exports.signIn = (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
   User.findOne({ email: request.body.email })
     .then((result) => {
-      let payload = { subject: result._id };
-      let token = jwt.sign(payload, "aabbccdd");
-      return response
-        .status(200)
-        .json({ status: "Login Success", result: result, token: token });
+      var decipher = crypto.createDecipher(algo, key);
+      var decrypted =
+        decipher.update(result.password, "hex", "utf8") +
+        decipher.final("utf8");
+      console.log(decrypted);
+      if (result.isEmailVerified == true && result.isMobileVerified == true) {
+        if (decrypted == request.body.password) {
+          let payload = { subject: result._id };
+          let token = jwt.sign(payload, "aabbccdd");
+          return response.status(200).json({
+            status: "Login Success",
+            result: result,
+            token: token,
+          });
+        } else
+          return response.status(401).json({ message: "Invalid Password" });
+      } else
+        return response
+          .status(401)
+          .json({ message: "Please verify your accout first then login" });
     })
     .catch((err) => {
+      console.log(err);
       return response.status(500).json(err);
     });
-};
-
-exports.signIn = (request, response) => {
-
-    const errors = validationResult(request);
-    if (!errors.isEmpty())
-        return response.status(400).json({ errors: errors.array()});
-
-    User.findOne({ email: request.body.email })
-        .then((result) => {
-            var decipher = crypto.createDecipher(algo, key);
-            var decrypted =
-                decipher.update(result.password, "hex", "utf8") +
-                decipher.final("utf8");
-                console.log(decrypted);
-            if (result.isEmailVerified == true && result.isMobileVerified == true) {
-                if (decrypted == request.body.password) {
-                    let payload = { subject: result._id };
-                    let token = jwt.sign(payload, "aabbccdd");
-                    return response.status(200)
-                        .json({       
-                            status: "Login Success",
-                            result: result,
-                            token: token
-                        });
-                }
-                else
-                    return response.status(401).json({ message: "Invalid Password" });
-            }
-            else
-                return response.status(401).json({ message: "Please verify your accout first then login" });
-        })
-        .catch((err) => {
-            console.log(err);
-            return response.status(500).json(err);
-        });
 };
 
 exports.editProfile = (request, response) => {
@@ -299,8 +312,7 @@ exports.editProfileNMI = async (request, response) => {
     var result = await cloudinary.v2.uploader.upload(request.file.path);
     image = result.url;
     console.log(image);
-  }else
-   image=request.body.oldImageUrl
+  } else image = request.body.oldImageUrl;
   User.updateOne(
     { _id: request.body.userId },
     {
