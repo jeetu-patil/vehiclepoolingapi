@@ -33,7 +33,7 @@ exports.allPublishRidesForUser= (request, response) => {
     if (!errors.isEmpty())
         return response.status(400).json({ errors: errors.array() });
     PublishRide.find()
-    .populate("publisherId").populate("fromId").populate("toId")
+    .populate("publisherId").populate("fromId").populate("toId").populate("historyOfUser")
     .then((result) => {
         return response.status(200).json(result);
     })

@@ -20,20 +20,17 @@ router.post("/signup",
     body("age").isNumeric(),
     body("aadhar").isLength(12),
     userController.signUp);
-    router.post("/edit-profile",body("name").notEmpty(),
+    router.post("/edit-profile",upload.single("image"),body("name").notEmpty(),
     body("userId").notEmpty(),
     body("miniBio").notEmpty(),
-    upload.single("image"),userController.editProfileNMI)
+    userController.editProfileNMI)
 router.post("/verify-email",body("id").notEmpty(),userController.verifyEmail);
 
 router.post("/signin",
     body("email").isEmail().notEmpty(),
     userController.signIn);
 
-// router.post("/edit-profile",
-// body("name").notEmpty(),
-// body("age").notEmpty().isNumeric(),
-// userController.editProfile);
+
 
 router.post("/verify-mobile",body("mobile").notEmpty(),body("userId").notEmpty(),      
 userController.verifyMobile);

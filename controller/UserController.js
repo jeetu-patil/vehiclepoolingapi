@@ -193,39 +193,6 @@ exports.signIn = (request, response) => {
             return response.status(500).json(err);
         });
 };
-
-exports.editProfile = (request, response) => {
-    const errors = validationResult(request);
-    if (!errors.isEmpty())  
-      return response.status(400).json({ errors: errors.array() });
-
-    User.updateOne(
-      { _id: request.body.userId },
-      {
-        $set: {
-          name: request.body.name,
-          age : request.body.age,
-          gender : request.body.gender
-        }
-      }
-    )
-      .then((result) => {
-        if (result.modifiedCount) {
-          User.findOne({ _id: request.body.userId })
-            .then((result) => {
-              return response.status(202).json(result);
-            })
-            .catch((err) => {
-              return response.status(500).json(err);
-            });
-        }
-      })
-      .catch((err) => {
-        return response.status(500).json(err);
-      });
-};
-  
-
 exports.confirmMobileVerification= (request, response) => {
     const errors = validationResult(request);
   if (!errors.isEmpty())
@@ -279,12 +246,13 @@ exports.addComment=async (request, response) => {
     });
 };
 exports.editProfileNMI = async (request, response) => {
-    console.log(request.body.name);
-    console.log(request.file);
+    // console.log(request.body);
+    // console.log(request.file);
     const errors = validationResult(request);
+    console.log(errors);
     if (!errors.isEmpty())  
       return response.status(400).json({ errors: errors.array() });
-      let image="";
+    //   let image=request.body.ImageUrl;
     
       if(request.file)
     { 
@@ -292,23 +260,27 @@ exports.editProfileNMI = async (request, response) => {
         image=result.url;
         console.log(image);
     }
+    else
+    {
+        image=request.body.ImageUrl;
+    }
     User.updateOne(
       { _id: request.body.userId },
       {
-        $set: {
+    
           name: request.body.name,
           miniBio : request.body.miniBio,
           image : image
-        }
+        
       })
       .then((result) => {
         if (result) {
+            console.log("In Then bLoack")
             console.log(result);
             return response.status(200).json(result);
         }
         
-        })
-          
+        })         
             .catch((err) => {
               return response.status(500).json(err);
             });

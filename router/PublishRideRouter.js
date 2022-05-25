@@ -17,11 +17,12 @@ const upload=multer({storage:storage});
 router.post("/checkuserride", body("id").notEmpty(),publishController.checkUserRidePublish);
 
 //if it is first ride then he/she fill some detail one time
-router.post("/firstpublishride",body("name").notEmpty(),
-            body("mobile").notEmpty(),
+router.post("/firstpublishride",upload.single("image"),
+            body("name").notEmpty(),
+            body("number").notEmpty(),
             body("wheeler").notEmpty(),
             body("userId").notEmpty(),
-        upload.single("image"),publishController.firstPublishRide);
+        publishController.firstPublishRide);
 
 //here publisher pusblish ride
 router.post("/publishride",body("rideTime").notEmpty(),body("rideDate").notEmpty(),
