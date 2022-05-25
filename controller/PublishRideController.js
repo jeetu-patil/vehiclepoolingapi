@@ -37,9 +37,14 @@ exports.checkUserRidePublish = (request, response) => {
 
 //if it is first ride then he/she fill some detail one time
 exports.firstPublishRide = async (request, response) => {
+  console.log(request.body)
+  console.log(request.file)
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
+
+  
+
   let vehicleImage = "";
   if (request.file) {
     var result = await cloudinary.v2.uploader.upload(request.file.path);
@@ -162,6 +167,7 @@ exports.allPublishRidesForUser = async (request, response) => {
     isBooked: false,
     rideDate: { $gt: Date.now() },
     isCancelled: false,
+    seatAvailable:{$gt:0}
   })
     .sort({ date: "desc" })
     .populate("publisherId")
@@ -175,9 +181,6 @@ exports.allPublishRidesForUser = async (request, response) => {
   });
 
   for (var i = 0; i < publish1.length; i++) {
-    console.log(
-      typeof publish1[i].rideDate + "<" + typeof Date.now().toString()
-    );
     if (publish1[i].rideDate < Date.now()) {
       console.log("Successs" + publish1[i]._id);
       await PublishRide.updateOne(
