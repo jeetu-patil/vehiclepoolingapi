@@ -13,7 +13,7 @@ router.get("/published-rides",adminController.allPublishRidesForUser);
 router.get("/booked-rides",adminController.bookRides);
 
 router.get("/user-list",adminController.userList);
-
+// Routes
 // router.get("/publisher-cancelled-rides",adminController.publisherCancelledRides);
 
 module.exports =router;
