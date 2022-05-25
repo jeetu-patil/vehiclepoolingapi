@@ -18,7 +18,7 @@ exports.bookRide=async (request, response) => {
     BookRide.create({
         bookerId: request.body.bookerId,
         rideId: request.body.rideId,
-        seatWant: request.body.seat,
+        seatWant: request.body.seatWant,
         
     })
     .then(result => {
