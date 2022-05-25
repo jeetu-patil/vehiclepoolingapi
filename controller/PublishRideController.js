@@ -37,9 +37,8 @@ exports.checkUserRidePublish = (request, response) => {
 
 //if it is first ride then he/she fill some detail one time
 exports.firstPublishRide = async (request, response) => {
-  console.log(request.body)
-  console.log(request.file)
   const errors = validationResult(request);
+  console.log(errors);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
@@ -50,7 +49,9 @@ exports.firstPublishRide = async (request, response) => {
     var result = await cloudinary.v2.uploader.upload(request.file.path);
     vehicleImage = result.url;
   }
-
+  else
+  vehicleImage=request.body.imageUrl;
+   console.log("Url image"+vehicleImage)
   let vechile = {
     name: request.body.name,
     number: request.body.number,

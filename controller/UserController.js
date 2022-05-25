@@ -303,34 +303,41 @@ exports.addComment = async (request, response) => {
     });
 };
 exports.editProfileNMI = async (request, response) => {
-  const errors = validationResult(request);
-  if (!errors.isEmpty())
-    return response.status(400).json({ errors: errors.array() });
-  let image = "";
-
-  if (request.file) {
-    var result = await cloudinary.v2.uploader.upload(request.file.path);
-    image = result.url;
-    console.log(image);
-  } else image = request.body.oldImageUrl;
-  User.updateOne(
-    { _id: request.body.userId },
-    {
-      $set: {
-        name: request.body.name,
-        miniBio: request.body.miniBio,
-        image: image,
-      },
+    const errors = validationResult(request);
+    console.log(errors);
+    if (!errors.isEmpty())  
+      return response.status(400).json({ errors: errors.array() });
+    //   let image=request.body.ImageUrl;
+    
+      if(request.file)
+    { 
+        var result=await cloudinary.v2.uploader.upload(request.file.path);
+        image=result.url;
+        console.log(image);
     }
-  )
-    .then((result) => {
-      if (result) {
-        console.log(result);
-        return response.status(200).json(result);
-      }
-    })
-
-    .catch((err) => {
-      return response.status(500).json(err);
-    });
+    else
+    {
+        image=request.body.ImageUrl;
+    }
+    User.updateOne(
+      { _id: request.body.userId },
+      {
+    
+          name: request.body.name,
+          miniBio : request.body.miniBio,
+          image : image
+        
+      })
+      .then((result) => {
+        if (result) {
+            console.log("In Then bLoack")
+            console.log(result);
+            return response.status(200).json(result);
+        }
+        
+        })         
+            .catch((err) => {
+              return response.status(500).json(err);
+            });
+        }
 };

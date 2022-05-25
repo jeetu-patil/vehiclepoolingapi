@@ -21,15 +21,12 @@ router.post(
 );
 
 //if it is first ride then he/she fill some detail one time
-router.post(
-  "/firstpublishride",
-  upload.single("image"),
-  body("name").notEmpty(),
-  body("mobile").notEmpty(),
-  body("wheeler").notEmpty(),
-  body("userId").notEmpty(),
-  publishController.firstPublishRide
-);
+router.post("/firstpublishride",upload.single("image"),
+            body("name").notEmpty(),
+            body("number").notEmpty(),
+            body("wheeler").notEmpty(),
+            body("userId").notEmpty(),
+        publishController.firstPublishRide);
 
 //here publisher pusblish ride
 router.post(
