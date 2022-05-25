@@ -315,8 +315,6 @@ exports.acceptRequestOfBooker = async (request, response) => {
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
-  console.log(request.body);
-
   let publishRider = await PublishRide.findOne({
     publisherId: request.body.publisherId,
     _id: request.body.rideId,

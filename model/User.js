@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
     },
     password : {
         type : String,
-        required : true
     },
     mobile : {
         type : Number,
@@ -18,15 +17,14 @@ const userSchema = new mongoose.Schema({
     },
     age : {
         type : Number,
-        required : true,
+        default:0
     },
     gender : {
         type : String,
-        required : true
+        default : ""
     },
     aadharCard : {
         type : String,
-        required : true
     },
     isBlock : {
         type : Boolean,
