@@ -14,7 +14,7 @@ const vonage = new Vonage({
 cloudinary.config({
   cloud_name: "dfhuhxrw3",
   api_key: "212453663814245",
-  api_secret: "zzSd8ptSYG-MS7hRnE-Ab46Bmts",
+  api_secret: "zzSd8ptSYG-MS7hRnE-Ab46Bmts",   
 });
 
 //check it is first ride or not

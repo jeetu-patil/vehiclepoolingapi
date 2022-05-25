@@ -26,7 +26,7 @@ exports.publishHistory= async (request, response) => {
     if (!errors.isEmpty())
         return response.status(400).json({ errors: errors.array() });
     let temp=[];
-    let i=0;
+    let i=0;    
     let result=await PublishRide.find({publisherId: request.body.userId,isBooked:true}).sort({date: 'desc'})
     .populate("publisherRequest").populate("fromId").populate("toId");
     

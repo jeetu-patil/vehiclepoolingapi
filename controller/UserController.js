@@ -168,37 +168,39 @@ exports.loginWithGoogle = (request, response) => {
 };
 
 exports.signIn = (request, response) => {
-  const errors = validationResult(request);
-  if (!errors.isEmpty())
-    return response.status(400).json({ errors: errors.array() });
 
-  User.findOne({ email: request.body.email })
-    .then((result) => {
-      var decipher = crypto.createDecipher(algo, key);
-      var decrypted =
-        decipher.update(result.password, "hex", "utf8") +
-        decipher.final("utf8");
-      console.log(decrypted);
-      if (result.isEmailVerified == true && result.isMobileVerified == true) {
-        if (decrypted == request.body.password) {
-          let payload = { subject: result._id };
-          let token = jwt.sign(payload, "aabbccdd");
-          return response.status(200).json({
-            status: "Login Success",
-            result: result,
-            token: token,
-          });
-        } else
-          return response.status(401).json({ message: "Invalid Password" });
-      } else
-        return response
-          .status(401)
-          .json({ message: "Please verify your accout first then login" });
-    })
-    .catch((err) => {
-      console.log(err);
-      return response.status(500).json(err);
-    });
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(400).json({ errors: errors.array()});
+
+    User.findOne({ email: request.body.email })
+        .then((result) => {
+            var decipher = crypto.createDecipher(algo, key);
+            var decrypted =
+                decipher.update(result.password, "hex", "utf8") +
+                decipher.final("utf8");
+                console.log(decrypted);
+            if (result.isEmailVerified == true && result.isMobileVerified == true) {
+                if (decrypted == request.body.password) {
+                    let payload = { subject: result._id };
+                    let token = jwt.sign(payload, "aabbccdd");
+                    return response.status(200)
+                        .json({       
+                            status: "Login Success",
+                            result: result,
+                            token: token
+                        });
+                }
+                else
+                    return response.status(401).json({ message: "Invalid Password" });
+            }
+            else
+                return response.status(401).json({ message: "Please verify your accout first then login" });
+        })
+        .catch((err) => {
+            console.log(err);
+            return response.status(500).json(err);
+        });
 };
 
 exports.editProfile = (request, response) => {
