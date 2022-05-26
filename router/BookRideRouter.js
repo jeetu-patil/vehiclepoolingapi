@@ -5,15 +5,16 @@ const jwtAuth=require("../Authentication/Authenticate");
 const bookRiderController=require('../controller/BookRiderController');
 
 
-router.post("/book",body("bookerId").notEmpty(),
+router.post("/book",jwtAuth.tokenauthotication,
+         body("bookerId").notEmpty(),
           body('rideId').notEmpty(),
-          body("seatWant").notEmpty(),jwtAuth.tokenauthotication,
+          body("seatWant").notEmpty(),
           bookRiderController.bookRide);
 
-router.post("/iscancelled",
+router.post("/iscancelled",jwtAuth.tokenauthotication,
  body("Id").notEmpty(),bookRiderController.isCancelled);
-router.post("/isaccepted",body("Id"),bookRiderController.isAccepted);
-router.post("/getbookrides",body("bookerId").notEmpty(),bookRiderController.getBookRides);
+router.post("/isaccepted",jwtAuth.tokenauthotication,body("Id"),bookRiderController.isAccepted);
+router.post("/getbookrides",jwtAuth.tokenauthotication,body("bookerId").notEmpty(),bookRiderController.getBookRides);
 
     
 module.exports =router;

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
+const jwtAuth=require("../Authentication/Authenticate");
 const publishController = require("../controller/PublishRideController");
 
 const multer = require("multer");
@@ -15,13 +16,13 @@ const upload = multer({ storage: storage });
 
 //check it is first ride or not
 router.post(
-  "/checkuserride",
+  "/checkuserride",jwtAuth.tokenauthotication,
   body("id").notEmpty(),
   publishController.checkUserRidePublish
 );
 
 //if it is first ride then he/she fill some detail one time
-router.post("/firstpublishride",upload.single("image"),
+router.post("/firstpublishride",jwtAuth.tokenauthotication,upload.single("image"),
             body("name").notEmpty(),
             body("number").notEmpty(),
             body("wheeler").notEmpty(),
@@ -29,8 +30,7 @@ router.post("/firstpublishride",upload.single("image"),
         publishController.firstPublishRide);
 
 //here publisher pusblish ride
-router.post(
-  "/publishride",
+router.post("/publishride",jwtAuth.tokenauthotication,
   body("rideTime").notEmpty(),
   body("rideDate").notEmpty(),
   body("publisherId").notEmpty(),
@@ -42,8 +42,7 @@ router.post(
 );
 
 //here booker request to the publisher
-router.post(
-  "/requestforpublisher",
+router.post("/requestforpublisher",jwtAuth.tokenauthotication,
   body("rideId").notEmpty(),
   body("bookRideId").notEmpty(),
   body("bookerId").notEmpty(),
@@ -54,16 +53,14 @@ router.post(
 router.get("/publisherforuser", publishController.allPublishRidesForUser);
 
 //showing request to the publisher
-router.post(
-  "/showrequesttopublisher",
+router.post("/showrequesttopublisher",jwtAuth.tokenauthotication,
   body("publisherId").notEmpty(),
   body("rideId").notEmpty(),
   publishController.showRequestToThePublisher
 );
 
 //if publisher decline request of booker
-router.post(
-  "/declinerequestofbooker",
+router.post("/declinerequestofbooker",jwtAuth.tokenauthotication,
   body("bookerId").notEmpty(),
   body("publisherId").notEmpty(),
   body("rideId").notEmpty(),
@@ -71,8 +68,7 @@ router.post(
 );
 
 //if publisher accept booker request
-router.post(
-  "/acceptrequestofbooker",
+router.post("/acceptrequestofbooker",jwtAuth.tokenauthotication,
   body("bookerId").notEmpty(),
   body("publisherId").notEmpty(),
   body("rideId").notEmpty(),
@@ -81,39 +77,34 @@ router.post(
 );
 
 //if publisher cancelled ride
-router.post(
-  "/cancellride",
+router.post("/cancellride",jwtAuth.tokenauthotication,
   body("publisherId").notEmpty(),
   body("rideId").notEmpty(),
   publishController.cancelRide
 );
 
 //Particular ride request
-router.post(
-  "/particualride",
+router.post("/particualride",jwtAuth.tokenauthotication,
   body("id").notEmpty(),
   publishController.getParticualRideRequest
 );
 
 //all rides for booker according to date
-router.post(
-  "/ridesforbooker",
+router.post("/ridesforbooker",jwtAuth.tokenauthotication,
   body("from").notEmpty(),
   body("to").notEmpty(),
   publishController.getRidesForBooker
 );
 
 //showing all accept user by publisher
-router.post(
-  "/showallacceptrequestbypublisher",
+router.post("/showallacceptrequestbypublisher",jwtAuth.tokenauthotication,
   body("publisherId").notEmpty(),
   body("rideId").notEmpty(),
   publishController.showAllAcceptRequestByPublisher
 );
 
 //match otp which provide by booker to the publisher
-router.post(
-  "/matchotp",
+router.post("/matchotp",jwtAuth.tokenauthotication,
   body("id").notEmpty(),
   body("rideId").notEmpty(),
   body("otp").notEmpty(),
@@ -122,15 +113,13 @@ router.post(
 );
 
 //here get all publish rides of particular user
-router.post(
-  "/getPublishRidesOfSingle",
+router.post("/getPublishRidesOfSingle",jwtAuth.tokenauthotication,
   body("publisherId").notEmpty(),
   publishController.getPublishRidesOfSingle
 );
 
 //if booker cancel ride
-router.post(
-  "/cancelridebybooker",
+router.post("/cancelridebybooker",jwtAuth.tokenauthotication,
   body("bookerId").notEmpty(),
   body("rideId").notEmpty(),
   body("publisherId").notEmpty(),
