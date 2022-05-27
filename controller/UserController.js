@@ -23,7 +23,7 @@ cloudinary.config({
 });
 
 exports.signUp = (request, response) => {
-  if (!request.body.user) return response.status(500).json({ msg: "error" });
+  if (!request.body) return response.status(500).json({ msg: "error" });
 
   const errors = validationResult(request);
   if (!errors.isEmpty())
