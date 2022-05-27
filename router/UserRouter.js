@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const jwtAuth=require('../Authentication/Authenticate');
 const userController = require("../controller/UserController");
 const { body } = require("express-validator");
 const multer = require("multer");
+
 
 var storage = multer.diskStorage({
   destination: "public/images",
@@ -20,15 +22,14 @@ router.post(
   body("aadhar").isLength(12),
   userController.signUp
 );
-router.post(
-  "/edit-profile",
+router.post("/edit-profile",jwtAuth.tokenauthotication,
   upload.single("image"),
   body("name").notEmpty(),
   body("userId").notEmpty(),
   body("miniBio").notEmpty(),
   userController.editProfileNMI
 );
-router.post("/verify-email", body("id").notEmpty(), userController.verifyEmail);
+router.post("/verify-email", body("id").notEmpty(),userController.verifyEmail);
 
 router.post(
   "/signin",
@@ -73,11 +74,10 @@ router.post("/loginwithgoogle", userController.loginWithGoogle);
 
 router.post("/getuser", body("id").notEmpty(), userController.singleUser);
 
-router.post(
-  "/addcomment",
+router.post("/addcomment",jwtAuth.tokenauthotication,
   body("userId").notEmpty(),
   body("uId").notEmpty(),
-  body("feadback").notEmpty(),
+  body("feedback").notEmpty(),
   userController.addComment
 );
 

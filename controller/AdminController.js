@@ -2,6 +2,7 @@ const Admin=require("../model/Admin");
 const PublishRide = require("../model/PublishRide");
 const User = require("../model/User");
 const BookRide = require("../model/BookRide");
+const jwt=require("jsonwebtoken")
 const { validationResult } = require("express-validator");
 
 exports.signin=(request,response) => {
@@ -10,12 +11,21 @@ exports.signin=(request,response) => {
         return response.status(400).json({ errors: errors.array() });
     Admin.findOne({email:request.body.email,password:request.body.password})
     .then(result => {
-        return response.status(200).json(result);
-    })
-    .catch(err => {
+    //     return response.status(200).json(result);
+    
+    let payload = { subject: result._id };
+          let token = jwt.sign(payload, "aabbccdd");
+          return response.status(200).json({
+            status: "Login Success",
+            result: result,
+            token: token,
+          })
+      })
+     .catch(err => {
         return response.status(500).json(err);
-    });
-};
+     });
+//    })
+}
 
 exports.userList = (request,response)=>{
     const errors = validationResult(request);
