@@ -7,4 +7,4 @@ const publishRideController = require("../controller/PublishRideHistoryControlle
 router.post("/viewpublisherhistory",jwtAuth.tokenauthotication,body("rideId").notEmpty(),publishRideController.viewPublisherHistory);
 router.post("/publishhistiry",jwtAuth.tokenauthotication,body("userId").notEmpty(), publishRideController.publishHistory);
 
-module.exports =router;
+module.exports =router;      
