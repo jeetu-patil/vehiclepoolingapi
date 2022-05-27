@@ -77,7 +77,7 @@ router.post("/getuser", body("id").notEmpty(), userController.singleUser);
 router.post("/addcomment",jwtAuth.tokenauthotication,
   body("userId").notEmpty(),
   body("uId").notEmpty(),
-  body("feadback").notEmpty(),
+  body("feedback").notEmpty(),
   userController.addComment
 );
 

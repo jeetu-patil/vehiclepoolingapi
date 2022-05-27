@@ -283,7 +283,9 @@ exports.singleUser = (request, response) => {
 };
 
 exports.addComment = async (request, response) => {
+  console.log(request.body)
   const errors = validationResult(request);
+  console.log(errors)
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
