@@ -88,8 +88,8 @@ exports.publishRide = async (request, response) => {
   );
 
   let check = await PublishRide.findOne({
-    fromId: request.body.fromId,
-    toId: request.body.toId,
+    fromId: request.body.fromId,    
+    toId: request.body.toId,          
     rideDate: datum,
     publisherId: request.body.publisherId,
   });
