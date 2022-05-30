@@ -79,7 +79,7 @@ exports.publishRide = async (request, response) => {
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
   var data;
-  var today = new Date();
+  var today = new Date();     
   var date =
     today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
 
