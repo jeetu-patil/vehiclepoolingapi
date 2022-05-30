@@ -84,7 +84,7 @@ exports.publishRide = async (request, response) => {
     today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
 
   var datum = Date.parse(
-    request.body.rideDate + "," + request.body.rideTime + ":00"
+    request.body.rideDate + "," + request.body.rideTime
   );
 
   let check = await PublishRide.findOne({
