@@ -162,7 +162,8 @@ router.post(
   jwtAuth.tokenauthotication,
   body("bookRideId").notEmpty(),
   body("rideId").notEmpty(),
-  publishController.cancelBooker
+  publishController.cancelBooker    
 );
 
 module.exports = router;
+     
