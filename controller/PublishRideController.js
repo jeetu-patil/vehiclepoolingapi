@@ -710,3 +710,43 @@ exports.cancelRideByBooker = async (request, response) => {
       return response.status(500).json(err);
     });
 };
+
+
+exports.cancelBooker=async (request, response) => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty())
+    return response.status(400).json({ errors: errors.array() });
+
+  let publishRide=await PublishRide.findOne({_id:request.body.rideId});
+  let Booker=await BookRide.findOne({_id:request.body.bookRideId});
+
+  var i;
+  let historyOfUser=publishRide.historyOfUser;
+  for(i=0;i<historyOfUser.length;i++){
+    if(historyOfUser[i]==request.body.bookerId)
+      break;
+  }
+  publishRide.historyOfUser.splice(i-1, 1);
+
+  for(i=0;i<publishRide.otp[i].bookerId.length;i++){
+    if(publishRide.otp[i].bookerId==request.body.bookerId)
+      break;
+  }
+  publishRide.otp.splice(i-1, 1);
+
+  await publishRide.save();
+
+  await PublishRide.updateOne({_id:request.body.rideId},
+    {
+      seatAvailable:publishRide.seatAvailable+Booker.seatWant
+    }  
+  );
+
+  BookRide.deleteOne({_id:request.body.bookRideId})
+  .then(result => {
+    return response.status(200).json(result);
+  })
+  .catch(err => {
+    return res.status(500).json(err);
+  });
+};
