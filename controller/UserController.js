@@ -87,7 +87,7 @@ exports.verifyEmail = (request, response) => {
     }
   )
     .then((result) => {
-      if (result.modifiedCount) {
+      if (result.modifiedCount) {         
         return response.render("confirm.ejs");
       }
     })
