@@ -29,7 +29,7 @@ router.post("/edit-profile",jwtAuth.tokenauthotication,
   body("miniBio").notEmpty(),
   userController.editProfileNMI
 );
-router.post("/verify-email", body("id").notEmpty(),userController.verifyEmail);
+router.get("/verify-email/:id",userController.verifyEmail);
 
 router.post(
   "/signin",

@@ -81,7 +81,7 @@ exports.signUp = (request, response) => {
 
 exports.verifyEmail = (request, response) => {
   User.updateOne(
-    { _id: request.body.id },
+    { _id: request.params.id },
     {
       $set: { isEmailVerified: true },
     }
