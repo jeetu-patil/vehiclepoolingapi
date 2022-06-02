@@ -22,6 +22,17 @@ cloudinary.config({
   api_secret: "zzSd8ptSYG-MS7hRnE-Ab46Bmts",
 });
 
+
+exports.allUsers= (request, response) => {
+  User.find()
+  .then(result=>{
+    return response.status(200).json(result);
+  })
+  .catch(err => {
+    return response.status(500).json(err);
+  });
+};  
+
 exports.signUp = (request, response) => {
   if (!request.body) return response.status(500).json({ msg: "error" });
 
