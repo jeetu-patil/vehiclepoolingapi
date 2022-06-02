@@ -70,6 +70,12 @@ router.post(
   userController.confirmMobileVerification
 );
 
+
+router.get(
+  "/allUsers",
+  userController.allUsers
+);
+
 router.post("/loginwithgoogle", userController.loginWithGoogle);
 
 router.post("/getuser", body("id").notEmpty(), userController.singleUser);
