@@ -40,6 +40,7 @@ router.post(
 var upload = multer({storage : storage});
 router.post("/signup",
     body("name").notEmpty(),
+    body("mobileR").notEmpty(),
     body("email").isEmail().notEmpty(),
     body("password","password minimum length must be 6").isLength(6).notEmpty(),
     body("age").isNumeric(),

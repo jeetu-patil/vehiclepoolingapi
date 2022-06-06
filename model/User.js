@@ -31,10 +31,19 @@ const userSchema = new mongoose.Schema({
         type : Boolean,
         default : false
     },
+    mobileNoR:{
+        type : Number,
+        default:1
+    },
     isMobileVerified : {
         type : Boolean,
         default : false,
         required : true
+    },
+    isReferenceNo:{
+        type:Boolean,
+        default:false,
+        required:true
     },
     isEmailVerified : {
         type : Boolean,

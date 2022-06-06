@@ -14,7 +14,7 @@ const vonage = new Vonage({
 cloudinary.config({
   cloud_name: "dfhuhxrw3",
   api_key: "212453663814245",
-  api_secret: "zzSd8ptSYG-MS7hRnE-Ab46Bmts",   
+  api_secret: "zzSd8ptSYG-MS7hRnE-Ab46Bmts",
 });
 
 //check it is first ride or not
@@ -22,7 +22,7 @@ exports.checkUserRidePublish = (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
-  if (!request.body.id) return response.status(500).json({ msg: "error" });   
+  if (!request.body.id) return response.status(500).json({ msg: "error" });
 
   User.findOne({ _id: request.body.id })
     .then((result) => {
@@ -42,16 +42,12 @@ exports.firstPublishRide = async (request, response) => {
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
-  
-
   let vehicleImage = "";
   if (request.file) {
     var result = await cloudinary.v2.uploader.upload(request.file.path);
     vehicleImage = result.url;
-  }
-  else
-  vehicleImage=request.body.imageUrl;
-   console.log("Url image"+vehicleImage)
+  } else vehicleImage = request.body.imageUrl;
+  console.log("Url image" + vehicleImage);
   let vechile = {
     name: request.body.name,
     number: request.body.number,
@@ -78,62 +74,168 @@ exports.publishRide = async (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
-  var data;
-  var today = new Date();     
-  var date =
-    today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-
-  var datum = Date.parse(
-    request.body.rideDate + "," + request.body.rideTime
-  );
 
   let check = await PublishRide.findOne({
-    fromId: request.body.fromId,    
-    toId: request.body.toId,          
+    fromId: request.body.fromId,
+    toId: request.body.toId,
     rideDate: datum,
     publisherId: request.body.publisherId,
   });
 
   if (check) return response.status(200).json({ msg: "check-failed" });
 
-  PublishRide.create({
-    publisherId: request.body.publisherId,
-    fromId: request.body.fromId,
-    toId: request.body.toId,
-    rideDate: datum,
-    seatAvailable: request.body.seatAvailable,
-    distance: request.body.distance,
-    totalAmount: 0,
-    amountPerPerson: request.body.amountPerPerson,
-    isBooked: false,
-    ridePublishDate: date,
-    totalSeat: request.body.seatAvailable,
-    msgForBooker: request.body.msgForBooker,
-  })
-    .then((result) => {
-      data = result;
-      User.findOne({ _id: request.body.publisherId })
-        .then((result) => {
-          User.updateOne(
-            { _id: request.body.publisherId },
-            {
-              publishRideCount: result.publishRideCount + 1,
-            }
-          )
-            .then((result) => {
-              return response.status(200).json(data);
-            })
-            .catch((err) => {
-              return response.status(500).json(err);
-            });
-        })
-        .catch((error) => {
-          return response.status(500).json(err);
-        });
+  if (request.body.rideType == "daily") {
+    var data;
+    var today = new Date();
+    var date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getDate();
+
+    var datum = Date.parse(request.body.rideDate + "," + request.body.rideTime);
+    PublishRide.create({
+      publisherId: request.body.publisherId,
+      fromId: request.body.fromId,
+      toId: request.body.toId,
+      rideDate: datum,
+      seatAvailable: request.body.seatAvailable,
+      distance: request.body.distance,
+      totalAmount: 0,
+      amountPerPerson: request.body.amountPerPerson,
+      isBooked: false,
+      totalSeat: request.body.seatAvailable,
+      msgForBooker: request.body.msgForBooker,
+      rideType: request.body.rideType,
+      rideendDate:datum
     })
-    .catch((err) => {
-      return response.status(500).json(err);
-    });
+      .then((result) => {
+        data = result;
+        User.findOne({ _id: request.body.publisherId })
+          .then((result) => {
+            User.updateOne(
+              { _id: request.body.publisherId },
+              {
+                publishRideCount: result.publishRideCount + 1,
+              }
+            )
+              .then((result) => {
+                return response.status(200).json(data);
+              })
+              .catch((err) => {
+                return response.status(500).json(err);
+              });
+          })
+          .catch((error) => {
+            return response.status(500).json(err);
+          });
+      })
+      .catch((err) => {
+        return response.status(500).json(err);
+      });
+  } else if (request.body.rideType == "weekly") {
+    var data;
+    var today = new Date();
+    var date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      (today.getDate() + 7);
+      var datum = Date.parse(request.body.rideDate + "," + request.body.rideTime);
+    PublishRide.create({
+      publisherId: request.body.publisherId,
+      fromId: request.body.fromId,
+      toId: request.body.toId,
+      rideDate: datum,
+      seatAvailable: request.body.seatAvailable,
+      distance: request.body.distance,
+      totalAmount: 0,
+      amountPerPerson: request.body.amountPerPerson,
+      isBooked: false,
+      totalSeat: request.body.seatAvailable,
+      msgForBooker: request.body.msgForBooker,
+      rideType: request.body.rideType,
+      rideendDate: Date.parse(date),
+    })
+      .then((result) => {
+        data = result;
+        User.findOne({ _id: request.body.publisherId })
+          .then((result) => {
+            User.updateOne(
+              { _id: request.body.publisherId },
+              {
+                publishRideCount: result.publishRideCount + 1,
+              }
+            )
+              .then((result) => {
+                return response.status(200).json(data);
+              })
+              .catch((err) => {
+                return response.status(500).json(err);
+              });
+          })
+          .catch((error) => {
+            return response.status(500).json(err);
+          });
+      })
+      .catch((err) => {
+        return response.status(500).json(err);
+      });
+
+    var datum = Date.parse(request.body.rideDate + "," + request.body.rideTime);
+  } else if (request.body.rideType == "monthly") {
+    var data;
+    var today = new Date();
+    var date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 2) +
+      "-" +
+      today.getDate();
+    var datum = Date.parse(request.body.rideDate + "," + request.body.rideTime);
+
+    PublishRide.create({
+      publisherId: request.body.publisherId,
+      fromId: request.body.fromId,
+      toId: request.body.toId,
+      rideDate: datum,
+      seatAvailable: request.body.seatAvailable,
+      distance: request.body.distance,
+      totalAmount: 0,
+      amountPerPerson: request.body.amountPerPerson,
+      isBooked: false,
+      totalSeat: request.body.seatAvailable,
+      msgForBooker: request.body.msgForBooker,
+      rideType: request.body.rideType,
+      rideendDate: Date.parse(date),
+    })
+      .then((result) => {
+        data = result;
+        User.findOne({ _id: request.body.publisherId })
+          .then((result) => {
+            User.updateOne(
+              { _id: request.body.publisherId },
+              {
+                publishRideCount: result.publishRideCount + 1,
+              }
+            )
+              .then((result) => {
+                return response.status(200).json(data);
+              })
+              .catch((err) => {
+                return response.status(500).json(err);
+              });
+          })
+          .catch((error) => {
+            return response.status(500).json(err);
+          });
+      })
+      .catch((err) => {
+        return response.status(500).json(err);
+      });
+  }
 };
 
 //here booker request to the publisher
@@ -166,9 +268,9 @@ exports.allPublishRidesForUser = async (request, response) => {
   let publish = await PublishRide.find({
     isTimeExpired: false,
     isBooked: false,
-    rideDate: { $gt: Date.now() },
+    rideendDate: { $gt: Date.now() },
     isCancelled: false,
-    seatAvailable:{$gt:0}
+    seatAvailable: { $gt: 0 },
   })
     .sort({ date: "desc" })
     .populate("publisherId")
@@ -182,8 +284,7 @@ exports.allPublishRidesForUser = async (request, response) => {
   });
 
   for (var i = 0; i < publish1.length; i++) {
-    if (publish1[i].rideDate < Date.now()) {
-      console.log("Successs" + publish1[i]._id);
+    if (publish1[i].rideendDate < Date.now()) {
       await PublishRide.updateOne(
         { _id: publish1[i]._id },
         {
@@ -200,19 +301,38 @@ exports.allPublishRidesForUser = async (request, response) => {
 
 //here get all publish rides of particular user
 exports.getPublishRidesOfSingle = async (request, response) => {
+  console.log(request.body)
+  let temp = [];
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
+
+  // let answer = await PublishRide.find({
+  //   publisherId: request.body.publisherId,
+  //   isBooked: false,
+  //   rideendDate: { $gt: Date.now() },
+  //   isCancelled: false,
+  //   seatAvailable: { $gt: 0 },
+  // }).populate("publisherRequest")
+  // .populate("fromId")
+  // .populate("toId");
+
   await PublishRide.find({
     publisherId: request.body.publisherId,
     isBooked: false,
-    rideDate: { $gt: Date.now() },
+    rideendDate: { $gt: Date.now() },
     isCancelled: false,
+    seatAvailable: { $gt: 0 }
   })
     .populate("publisherRequest")
     .populate("fromId")
     .populate("toId")
     .then((result) => {
+      // for (var i = 0; i < answer.length; i++) {
+      //   if (answer[i].rideendDate > Date.now()) {
+      //     result[result.length] = answer[i];
+      //   }
+      // }
       return response.status(200).json(result);
     })
     .catch((err) => {
@@ -247,7 +367,7 @@ exports.declineRequestOfBooker = (request, response) => {
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
-  console.log(request.body)
+  console.log(request.body);
 
   User.findOne({ _id: request.body.bookerId })
     .then(async (result) => {
@@ -323,8 +443,8 @@ exports.acceptRequestOfBooker = async (request, response) => {
   let booker = await BookRide.findOne({
     _id: request.body.bookRideId,
   }).populate("bookerId");
-  
-  console.log("hiii"+(publishRider.seatAvailable - booker.seatWant))
+
+  console.log("hiii" + (publishRider.seatAvailable - booker.seatWant));
   if (publishRider.seatAvailable > 0) {
     PublishRide.updateOne(
       { _id: request.body.rideId },
@@ -333,7 +453,7 @@ exports.acceptRequestOfBooker = async (request, response) => {
       }
     )
       .then(async (result) => {
-        console.log(result)
+        console.log(result);
         let otp = otpGenerator.generate(4, {
           lowerCaseAlphabets: false,
           upperCaseAlphabets: false,
@@ -621,35 +741,69 @@ exports.getRidesForBooker = (request, response) => {
     return response.status(400).json({ errors: errors.array() });
   statusRide = false;
   totalRides = [];
-  PublishRide.find({ fromId: request.body.from, toId: request.body.to })
-    .populate("publisherId")
-    .populate("fromId")
-    .populate("toId")
-    .then((rides) => {
-      console.log("ID1 : " + rides.length);
-      if (rides.length > 0) {
-        for (let i = 0; i < rides.length; i++) {
-          const d = new Date(rides[i].rideDate * 1);
-          let date = d.toDateString();
-          console.log(date + "==" + new Date(request.body.date).toDateString());
-          if (
-            date == new Date(request.body.date).toDateString() &&
-            rides[i].seatAvailable >= request.body.seat
-          ) {
-            statusRide = true;
-            totalRides[i] = rides[i];
-          }
-        }
 
-        console.log(statusRide);
-        if (statusRide) return response.status(200).json(totalRides);
-      }
-      return response.status(200).json(totalRides);
+  if (request.body.rideType == "daily") {
+    PublishRide.find({
+      fromId: request.body.from,
+      toId: request.body.to,
+      rideDate: { $gt: Date.now() },
+      isCancelled: false,
+      seatAvailable: { $gt: 0 },
     })
-    .catch((err) => {
-      console.log(err);
-      return response.status(500).json(err);
-    });
+      .populate("publisherId")
+      .populate("fromId")
+      .populate("toId")
+      .then((rides) => {
+        console.log("ID1 : " + rides.length);
+        if (rides.length > 0) {
+          for (let i = 0; i < rides.length; i++) {
+            const d = new Date(rides[i].rideDate * 1);
+            let date = d.toDateString();
+            if (
+              date == new Date(request.body.date).toDateString() &&
+              rides[i].seatAvailable >= request.body.seat
+            ) {
+              statusRide = true;
+              totalRides[i] = rides[i];
+            }
+          }
+          if (statusRide) return response.status(200).json(totalRides);
+        }
+        return response.status(200).json(totalRides);
+      })
+      .catch((err) => {
+        console.log(err);
+        return response.status(500).json(err);
+      });
+  } else {
+    PublishRide.find({
+      fromId: request.body.from,
+      toId: request.body.to,
+      rideType: request.body.rideType,
+      rideendDate: { $gt: Date.now() },
+      isCancelled: false,
+      seatAvailable: { $gt: 0 },
+    })
+      .populate("publisherId")
+      .populate("fromId")
+      .populate("toId")
+      .then((rides) => {
+        if (rides.length > 0) {
+          for (let i = 0; i < rides.length; i++) {
+            if (rides[i].seatAvailable >= request.body.seat) {
+              statusRide = true;
+              totalRides[i] = rides[i];
+            }
+          }
+          if (statusRide) return response.status(200).json(totalRides);
+        }
+        return response.status(200).json(totalRides);
+      })
+      .catch((err) => {
+        console.log(err);
+        return response.status(500).json(err);
+      });
+  }
 };
 
 //if cancell by booker
@@ -711,42 +865,40 @@ exports.cancelRideByBooker = async (request, response) => {
     });
 };
 
-
-exports.cancelBooker=async (request, response) => {
+exports.cancelBooker = async (request, response) => {
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
-  let publishRide=await PublishRide.findOne({_id:request.body.rideId});
-  let Booker=await BookRide.findOne({_id:request.body.bookRideId});
+  let publishRide = await PublishRide.findOne({ _id: request.body.rideId });
+  let Booker = await BookRide.findOne({ _id: request.body.bookRideId });
 
   var i;
-  let historyOfUser=publishRide.historyOfUser;
-  for(i=0;i<historyOfUser.length;i++){
-    if(historyOfUser[i]==request.body.bookerId)
-      break;
+  let historyOfUser = publishRide.historyOfUser;
+  for (i = 0; i < historyOfUser.length; i++) {
+    if (historyOfUser[i] == request.body.bookerId) break;
   }
-  publishRide.historyOfUser.splice(i-1, 1);
+  publishRide.historyOfUser.splice(i - 1, 1);
 
-  for(i=0;i<publishRide.otp[i].bookerId.length;i++){
-    if(publishRide.otp[i].bookerId==request.body.bookerId)
-      break;
+  for (i = 0; i < publishRide.otp[i].bookerId.length; i++) {
+    if (publishRide.otp[i].bookerId == request.body.bookerId) break;
   }
-  publishRide.otp.splice(i-1, 1);
+  publishRide.otp.splice(i - 1, 1);
 
   await publishRide.save();
 
-  await PublishRide.updateOne({_id:request.body.rideId},
+  await PublishRide.updateOne(
+    { _id: request.body.rideId },
     {
-      seatAvailable:publishRide.seatAvailable+Booker.seatWant
-    }  
+      seatAvailable: publishRide.seatAvailable + Booker.seatWant,
+    }
   );
 
-  BookRide.deleteOne({_id:request.body.bookRideId})
-  .then(result => {
-    return response.status(200).json(result);
-  })
-  .catch(err => {
-    return res.status(500).json(err);
-  });
+  BookRide.deleteOne({ _id: request.body.bookRideId })
+    .then((result) => {
+      return response.status(200).json(result);
+    })
+    .catch((err) => {
+      return res.status(500).json(err);
+    });
 };
