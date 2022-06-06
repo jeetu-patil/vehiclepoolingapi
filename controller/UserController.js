@@ -51,6 +51,7 @@ exports.signUp = (request, response) => {
     age: request.body.age,
     gender: request.body.gender,
     aadharCard: request.body.aadhar,
+    mobileNoR:request.body.mobileR
   });
   user
     .save()
@@ -194,6 +195,7 @@ exports.loginWithGoogle = async (request, response) => {
 };
 
 exports.signIn = (request, response) => {
+  console.log(request.body);
   const errors = validationResult(request);
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
@@ -205,7 +207,7 @@ exports.signIn = (request, response) => {
         decipher.update(result.password, "hex", "utf8") +
         decipher.final("utf8");
       console.log(decrypted);
-      if (result.isEmailVerified == true && result.isMobileVerified == true) {
+      if (result.isEmailVerified == true && result.isMobileVerified == true && result.isBlock == false && result.isReferenceNo==true) {
         if (decrypted == request.body.password) {
           let payload = { subject: result._id };
           let token = jwt.sign(payload, "aabbccdd");
