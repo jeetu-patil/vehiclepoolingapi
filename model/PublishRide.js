@@ -41,9 +41,6 @@ const publishRideSchema = new mongoose.Schema({
         type:Boolean,
         default : false
     },
-    ridePublishDate:{
-        type:Date
-    },
     otp:[
         {
             bookerId:
@@ -80,7 +77,9 @@ const publishRideSchema = new mongoose.Schema({
             bookRideId:{type:Schema.Types.ObjectId}
         }
     ],
-    msgForBooker:{type:String}
+    msgForBooker:{type:String},
+    rideType:{type:String},
+    rideendDate:{type:String}
 },{ versionKey: false })
 
 module.exports = mongoose.model("publishride",publishRideSchema);
