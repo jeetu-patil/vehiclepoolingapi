@@ -12,8 +12,8 @@ var key = "password";
 var algo = "aes256";
 
 const vonage = new Vonage({
-  apiKey: "bed73ad1",
-  apiSecret: "Gu3saUPV8zOKBbAW",
+  apiKey: "24b6f39f",
+  apiSecret: "uZRuodZOJy4ov4KG",
 });
 
 cloudinary.config({
