@@ -5,7 +5,6 @@ const User = require("../model/User");
 const cloudinary = require("cloudinary");
 const BookRide = require("../model/BookRide");
 const otpGenerator = require("otp-generator");
-// const fast2sms = require("fast-two-sms");
 const Vonage = require("@vonage/server-sdk");
 const vonage = new Vonage({
   apiKey: "24b6f39f",
