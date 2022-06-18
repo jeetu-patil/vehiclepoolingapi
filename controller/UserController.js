@@ -167,15 +167,14 @@ exports.loginWithGoogle = async (request, response) => {
   if (!errors.isEmpty())
     return response.status(400).json({ errors: errors.array() });
 
-  let user = await User.findOne({ email: request.body.email })
-
-  // if (!user) {
-  //   User.create({
-  //     email: request.body.email,
-  //     name: request.body.name,
-  //   })
+    User.findOne({ email: request.body.email })
       .then((result) => {
         let payload = { subject: result._id };
+        if(result){
+          return response
+          .status(200)
+          .json({ status: "Login Failed"});
+        }
         let token = jwt.sign(payload, "aabbccdd");
         return response
           .status(200)
@@ -184,13 +183,6 @@ exports.loginWithGoogle = async (request, response) => {
       .catch((error) => {
         return response.status(500).json(err);
       });
-  // } else {
-    let payload = { subject: user._id };
-    let token = jwt.sign(payload, "aabbccdd");
-    return response
-      .status(200)
-      .json({ status: "Login Success", result: user, token: token });
-  // }
   return response.status(200).json(user);
 };
 
