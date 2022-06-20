@@ -56,6 +56,7 @@ exports.signUp = (request, response) => {
   user
     .save()
     .then((result) => {
+      console.log("hiii")
       let transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -63,7 +64,7 @@ exports.signUp = (request, response) => {
         requireTLS: true,
         auth: {
           user: "vastram823@gmail.com",
-          pass: "fcv@1234",
+          pass: "zydrbnnikwjzwkgt",
         },
       });
       var message = {
@@ -75,6 +76,8 @@ exports.signUp = (request, response) => {
           result._id +
           '">click here to verify your account</a><p>Have fun, and dont hesitate to contact us with your feedback</p><br><p> The Book-Us-Meal Team</p><a href="https://book-your-meal.herokuapp.com/">book-your-meal.herokuapp.com/</a>',
       };
+
+      console.log("hello world!");
 
       transporter.sendMail(message, (err, info) => {
         if (err) {
