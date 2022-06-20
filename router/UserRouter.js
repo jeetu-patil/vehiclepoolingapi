@@ -36,6 +36,10 @@ router.post(
   body("email").isEmail().notEmpty(),
   userController.signIn
 );
+router.post("/forgot",
+  // body("email").isEmail().notEmpty(),
+  userController.forgot
+);
 
 var upload = multer({storage : storage});
 router.post("/signup",
