@@ -56,6 +56,7 @@ exports.signUp = (request, response) => {
   user
     .save()
     .then((result) => {
+      console.log("hiii")
       let transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -63,7 +64,7 @@ exports.signUp = (request, response) => {
         requireTLS: true,
         auth: {
           user: "vastram823@gmail.com",
-          pass: "fcv@1234",
+          pass: "zydrbnnikwjzwkgt",
         },
       });
       var message = {
@@ -75,6 +76,8 @@ exports.signUp = (request, response) => {
           result._id +
           '">click here to verify your account</a><p>Have fun, and dont hesitate to contact us with your feedback</p><br><p> The Book-Us-Meal Team</p><a href="https://book-your-meal.herokuapp.com/">book-your-meal.herokuapp.com/</a>',
       };
+
+      console.log("hello world!");
 
       transporter.sendMail(message, (err, info) => {
         if (err) {
@@ -169,12 +172,12 @@ exports.loginWithGoogle = async (request, response) => {
 
     User.findOne({ email: request.body.email })
       .then((result) => {
-        let payload = { subject: result._id };
-        if(result){
+        if(!result){
           return response
           .status(200)
           .json({ status: "Login Failed"});
         }
+        let payload = { subject: result._id };
         let token = jwt.sign(payload, "aabbccdd");
         return response
           .status(200)
@@ -183,35 +186,8 @@ exports.loginWithGoogle = async (request, response) => {
       .catch((error) => {
         return response.status(500).json(err);
       });
-  return response.status(200).json(user);
 };
 
-exports.forgot=(request,response)=>{
-   console.log(request.body);
-      if (!request.body) return response.status(500).json({ msg: "error" });
-  
-    // const errors = validationResult(request);
-    // if (!errors.isEmpty())
-    //   return response.status(500).json({ errors: errors.array() });
-  
-    var cipher = crypto.createCipher(algo, key);
-    var encrypted =
-      cipher.update(request.body.password, "utf8", "hex") + cipher.final("hex");
-  
-  User.updateOne({ _id: request.body.userId },
-    // { $set:
-         { password: encrypted}
-      // }
-    )
-    .then((result) => {
-      console.log(result);
-      return response.status(200).json(result);
-    }).catch(err=>{
-      console.log(err);
-      return response.status(500).json(err)
-    })
-
-}
 exports.signIn = (request, response) => {
   console.log(request.body);
   const errors = validationResult(request);
@@ -371,4 +347,29 @@ exports.editProfileNMI = async (request, response) => {
       return response.status(500).json(err);
     });
 }
-      
+exports.forgot=(request,response)=>{
+  console.log(request.body);
+     if (!request.body) return response.status(500).json({ msg: "error" });
+ 
+   // const errors = validationResult(request);
+   // if (!errors.isEmpty())
+   //   return response.status(500).json({ errors: errors.array() });
+ 
+   var cipher = crypto.createCipher(algo, key);
+   var encrypted =
+     cipher.update(request.body.password, "utf8", "hex") + cipher.final("hex");
+ 
+ User.updateOne({ _id: request.body.userId },
+   // { $set:
+        { password: encrypted}
+     // }
+   )
+   .then((result) => {
+     console.log(result);
+     return response.status(200).json(result);
+   }).catch(err=>{
+     console.log(err);
+     return response.status(500).json(err)
+   })
+
+}
