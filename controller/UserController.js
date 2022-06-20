@@ -347,4 +347,29 @@ exports.editProfileNMI = async (request, response) => {
       return response.status(500).json(err);
     });
 }
-      
+exports.forgot=(request,response)=>{
+  console.log(request.body);
+     if (!request.body) return response.status(500).json({ msg: "error" });
+ 
+   // const errors = validationResult(request);
+   // if (!errors.isEmpty())
+   //   return response.status(500).json({ errors: errors.array() });
+ 
+   var cipher = crypto.createCipher(algo, key);
+   var encrypted =
+     cipher.update(request.body.password, "utf8", "hex") + cipher.final("hex");
+ 
+ User.updateOne({ _id: request.body.userId },
+   // { $set:
+        { password: encrypted}
+     // }
+   )
+   .then((result) => {
+     console.log(result);
+     return response.status(200).json(result);
+   }).catch(err=>{
+     console.log(err);
+     return response.status(500).json(err)
+   })
+
+}
